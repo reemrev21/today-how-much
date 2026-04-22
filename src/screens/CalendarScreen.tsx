@@ -30,7 +30,8 @@ export function CalendarScreen(): React.JSX.Element {
   const {update} = useTransactions();
 
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>();
-  const bottomSheetRef = useRef<BottomSheet>(null);
+  const listSheetRef = useRef<BottomSheet>(null);
+  const editSheetRef = useRef<BottomSheet>(null);
 
   const ledgerId = getCurrentLedgerId() ?? '';
 
@@ -64,15 +65,22 @@ export function CalendarScreen(): React.JSX.Element {
 
   const handleDayPress = useCallback(
     (date: string) => {
-      setSelectedDate(prev => (prev === date ? null : date));
+      if (selectedDate === date) {
+        setSelectedDate(null);
+        listSheetRef.current?.close();
+      } else {
+        setSelectedDate(date);
+        listSheetRef.current?.snapToIndex(0);
+      }
     },
-    [setSelectedDate],
+    [selectedDate, setSelectedDate],
   );
 
   const handleEdit = useCallback(
     (transaction: Transaction) => {
       setEditingTransaction(transaction);
-      bottomSheetRef.current?.expand();
+      listSheetRef.current?.close();
+      setTimeout(() => editSheetRef.current?.expand(), 300);
     },
     [],
   );
@@ -90,14 +98,14 @@ export function CalendarScreen(): React.JSX.Element {
         });
       }
       setEditingTransaction(undefined);
-      bottomSheetRef.current?.close();
+      editSheetRef.current?.close();
     },
     [editingTransaction, update],
   );
 
   const handleCancel = useCallback(() => {
     setEditingTransaction(undefined);
-    bottomSheetRef.current?.close();
+    editSheetRef.current?.close();
   }, []);
 
   const renderBackdrop = useCallback(
@@ -159,23 +167,35 @@ export function CalendarScreen(): React.JSX.Element {
         onDayPress={handleDayPress}
       />
 
-      {/* Transaction list for selected date */}
-      {selectedDate ? (
-        <View style={[styles.listContainer, {borderTopColor: theme.border}]}>
-          <Text style={[styles.dateLabel, {color: theme.textSecondary}]}>
-            {dayjs(selectedDate).format('M월 D일 (ddd)')}
-          </Text>
-          <TransactionList
-            ledgerId={ledgerId}
-            date={selectedDate}
-            onEdit={handleEdit}
-          />
-        </View>
-      ) : null}
+      {/* Transaction list bottom sheet */}
+      <BottomSheet
+        ref={listSheetRef}
+        index={-1}
+        snapPoints={['35%', '60%']}
+        enablePanDownToClose
+        backgroundStyle={{backgroundColor: theme.surface}}
+        handleIndicatorStyle={{backgroundColor: theme.textSecondary}}
+        onClose={() => setSelectedDate(null)}
+      >
+        <BottomSheetView style={styles.sheetContent}>
+          {selectedDate && (
+            <>
+              <Text style={[styles.dateLabel, {color: theme.textSecondary}]}>
+                {dayjs(selectedDate).format('M월 D일 (ddd)')}
+              </Text>
+              <TransactionList
+                ledgerId={ledgerId}
+                date={selectedDate}
+                onEdit={handleEdit}
+              />
+            </>
+          )}
+        </BottomSheetView>
+      </BottomSheet>
 
       {/* Edit transaction bottom sheet */}
       <BottomSheet
-        ref={bottomSheetRef}
+        ref={editSheetRef}
         index={-1}
         snapPoints={['85%']}
         enablePanDownToClose
@@ -224,10 +244,6 @@ const styles = StyleSheet.create({
   summaryLabel: {fontSize: 11, fontWeight: '500'},
   summaryValue: {fontSize: 15, fontWeight: '700'},
   summaryVertDivider: {width: StyleSheet.hairlineWidth, marginHorizontal: 4},
-  listContainer: {
-    flex: 1,
-    borderTopWidth: StyleSheet.hairlineWidth,
-  },
   dateLabel: {
     fontSize: 13,
     fontWeight: '500',
