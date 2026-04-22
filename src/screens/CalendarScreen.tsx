@@ -8,7 +8,7 @@ import BottomSheet, {BottomSheetView, BottomSheetBackdrop} from '@gorhom/bottom-
 import {useTheme} from '../styles/theme';
 import {selectedMonthAtom, selectedDateAtom, dbVersionAtom} from '../store/atoms';
 import {getCurrentLedgerId} from '../store/settings';
-import {getMonthDaySummaries} from '../db/transactionQueries';
+import {getMonthDaySummaries, getMonthTotals} from '../db/transactionQueries';
 import {useTransactions} from '../hooks/useTransactions';
 
 import {MonthHeader} from '../components/calendar/MonthHeader';
@@ -17,6 +17,7 @@ import {LedgerSelector} from '../components/common/LedgerSelector';
 import {TransactionList} from '../components/transaction/TransactionList';
 import {TransactionForm} from '../components/transaction/TransactionForm';
 
+import {formatAmount} from '../utils/format';
 import type {Transaction} from '../types';
 
 export function CalendarScreen(): React.JSX.Element {
@@ -39,6 +40,17 @@ export function CalendarScreen(): React.JSX.Element {
     return getMonthDaySummaries(ledgerId, yearMonth);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ledgerId, yearMonth, dbVersion]);
+
+  const monthTotals = React.useMemo(() => {
+    if (!ledgerId) {return {income: 0, expense: 0};}
+    return getMonthTotals(ledgerId, yearMonth);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ledgerId, yearMonth, dbVersion]);
+
+  const todayStr = dayjs().format('YYYY-MM-DD');
+  const todaySummary = React.useMemo(() => {
+    return summaries.find(s => s.date === todayStr);
+  }, [summaries, todayStr]);
 
   const handlePrev = useCallback(() => {
     setYearMonth(prev => dayjs(`${prev}-01`).subtract(1, 'month').format('YYYY-MM'));
@@ -104,8 +116,36 @@ export function CalendarScreen(): React.JSX.Element {
     <View style={[styles.container, {backgroundColor: theme.background, paddingTop: insets.top}]}>
       {/* Top bar: Ledger selector */}
       <View style={[styles.topBar, {borderBottomColor: theme.border}]}>
-        <Text style={[styles.appName, {color: theme.text}]}>가계부</Text>
+        <Text style={[styles.appName, {color: theme.text}]}>오늘얼마</Text>
         <LedgerSelector />
+      </View>
+
+      {/* Today + Month summary */}
+      <View style={[styles.summaryCard, {backgroundColor: theme.surface}]}>
+        <View style={styles.summaryRow}>
+          <Text style={[styles.summaryLabel, {color: theme.textSecondary}]}>오늘 지출</Text>
+          <Text style={[styles.summaryValue, {color: theme.expense}]}>
+            {todaySummary?.expense ? `-${formatAmount(todaySummary.expense)}` : '0'}원
+          </Text>
+        </View>
+        <View style={[styles.summaryDivider, {backgroundColor: theme.border}]} />
+        <View style={styles.summaryRow}>
+          <Text style={[styles.summaryLabel, {color: theme.textSecondary}]}>
+            {dayjs(`${yearMonth}-01`).format('M월')} 지출
+          </Text>
+          <Text style={[styles.summaryValue, {color: theme.expense}]}>
+            {monthTotals.expense ? `-${formatAmount(monthTotals.expense)}` : '0'}원
+          </Text>
+        </View>
+        <View style={[styles.summaryDivider, {backgroundColor: theme.border}]} />
+        <View style={styles.summaryRow}>
+          <Text style={[styles.summaryLabel, {color: theme.textSecondary}]}>
+            {dayjs(`${yearMonth}-01`).format('M월')} 수입
+          </Text>
+          <Text style={[styles.summaryValue, {color: theme.income}]}>
+            {monthTotals.income ? `+${formatAmount(monthTotals.income)}` : '0'}원
+          </Text>
+        </View>
       </View>
 
       {/* Month navigation */}
@@ -169,6 +209,21 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   appName: {fontSize: 18, fontWeight: '700'},
+  summaryCard: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    borderRadius: 12,
+    padding: 14,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  summaryLabel: {fontSize: 13, fontWeight: '500'},
+  summaryValue: {fontSize: 16, fontWeight: '700'},
+  summaryDivider: {height: StyleSheet.hairlineWidth, marginVertical: 6},
   listContainer: {
     flex: 1,
     borderTopWidth: StyleSheet.hairlineWidth,
