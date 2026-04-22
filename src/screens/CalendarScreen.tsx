@@ -122,28 +122,28 @@ export function CalendarScreen(): React.JSX.Element {
 
       {/* Today + Month summary */}
       <View style={[styles.summaryCard, {backgroundColor: theme.surface}]}>
-        <View style={styles.summaryRow}>
+        <View style={styles.summaryCol}>
           <Text style={[styles.summaryLabel, {color: theme.textSecondary}]}>오늘 지출</Text>
           <Text style={[styles.summaryValue, {color: theme.expense}]}>
-            {todaySummary?.expense ? `-${formatAmount(todaySummary.expense)}` : '0'}원
+            {todaySummary?.expense ? formatAmount(todaySummary.expense) : '0'}
           </Text>
         </View>
-        <View style={[styles.summaryDivider, {backgroundColor: theme.border}]} />
-        <View style={styles.summaryRow}>
+        <View style={[styles.summaryVertDivider, {backgroundColor: theme.border}]} />
+        <View style={styles.summaryCol}>
           <Text style={[styles.summaryLabel, {color: theme.textSecondary}]}>
             {dayjs(`${yearMonth}-01`).format('M월')} 지출
           </Text>
           <Text style={[styles.summaryValue, {color: theme.expense}]}>
-            {monthTotals.expense ? `-${formatAmount(monthTotals.expense)}` : '0'}원
+            {monthTotals.expense ? formatAmount(monthTotals.expense) : '0'}
           </Text>
         </View>
-        <View style={[styles.summaryDivider, {backgroundColor: theme.border}]} />
-        <View style={styles.summaryRow}>
+        <View style={[styles.summaryVertDivider, {backgroundColor: theme.border}]} />
+        <View style={styles.summaryCol}>
           <Text style={[styles.summaryLabel, {color: theme.textSecondary}]}>
             {dayjs(`${yearMonth}-01`).format('M월')} 수입
           </Text>
           <Text style={[styles.summaryValue, {color: theme.income}]}>
-            {monthTotals.income ? `+${formatAmount(monthTotals.income)}` : '0'}원
+            {monthTotals.income ? formatAmount(monthTotals.income) : '0'}
           </Text>
         </View>
       </View>
@@ -210,20 +210,20 @@ const styles = StyleSheet.create({
   },
   appName: {fontSize: 18, fontWeight: '700'},
   summaryCard: {
+    flexDirection: 'row',
     marginHorizontal: 16,
     marginTop: 8,
     borderRadius: 12,
     padding: 14,
   },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  summaryCol: {
+    flex: 1,
     alignItems: 'center',
-    paddingVertical: 4,
+    gap: 4,
   },
-  summaryLabel: {fontSize: 13, fontWeight: '500'},
-  summaryValue: {fontSize: 16, fontWeight: '700'},
-  summaryDivider: {height: StyleSheet.hairlineWidth, marginVertical: 6},
+  summaryLabel: {fontSize: 11, fontWeight: '500'},
+  summaryValue: {fontSize: 15, fontWeight: '700'},
+  summaryVertDivider: {width: StyleSheet.hairlineWidth, marginHorizontal: 4},
   listContainer: {
     flex: 1,
     borderTopWidth: StyleSheet.hairlineWidth,
