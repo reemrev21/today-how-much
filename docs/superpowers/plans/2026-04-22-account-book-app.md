@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**App Name:** 오늘얼마 (패키지명: `oneuleolma`)
+**App Name:** 오늘얼마 (패키지명: `todayhowmuch`)
 
 **Goal:** React Native CLI 기반 달력형 개인 가계부 앱. 로컬 DB(op-sqlite) + CSV 양방향 지원.
 
@@ -78,7 +78,7 @@ src/
 
 ```bash
 cd /Users/lee/git/account-book-app
-npx @react-native-community/cli init OneulEolma --directory . --skip-git
+npx @react-native-community/cli init TodayHowMuch --directory . --skip-git
 ```
 
 프로젝트가 이미 git init 되어 있으므로 `--skip-git` 사용.
