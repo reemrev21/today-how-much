@@ -5,6 +5,7 @@ const TYPE_MAP: Record<string, TransactionType> = { 수입: "income", 지출: "e
 const TYPE_MAP_REVERSE: Record<TransactionType, string> = { income: "수입", expense: "지출" };
 
 const RECURRING_SECTION_MARKER = "[반복거래]";
+const SETTINGS_SECTION_MARKER = "[설정]";
 
 export interface CsvRow {
   date: string;
@@ -25,9 +26,15 @@ export interface CsvRecurringRow {
   is_active: boolean;
 }
 
+export interface CsvSettings {
+  categories: string[];
+  paymentMethods: string[];
+}
+
 export interface ParsedCsv {
   transactions: CsvRow[];
   recurringRules: CsvRecurringRow[];
+  settings?: CsvSettings;
 }
 
 function transactionsToCsv(transactions: Transaction[]): string {
@@ -55,18 +62,37 @@ function recurringRulesToCsv(rules: RecurringRule[]): string {
   return Papa.unparse(rows, { newline: "\n" });
 }
 
-export function buildExportCsv(transactions: Transaction[], rules: RecurringRule[]): string {
+function settingsToCsv(categories: string[], paymentMethods: string[]): string {
+  const rows = [
+    { 항목: "카테고리", 값: categories.join("|") },
+    { 항목: "결제수단", 값: paymentMethods.join("|") }
+  ];
+  return Papa.unparse(rows, { newline: "\n" });
+}
+
+export function buildExportCsv(
+  transactions: Transaction[],
+  rules: RecurringRule[],
+  categories?: string[],
+  paymentMethods?: string[]
+): string {
   let csv = transactionsToCsv(transactions);
   if (rules.length > 0) {
     csv += "\n\n" + RECURRING_SECTION_MARKER + "\n" + recurringRulesToCsv(rules);
+  }
+  if (categories && paymentMethods) {
+    csv += "\n\n" + SETTINGS_SECTION_MARKER + "\n" + settingsToCsv(categories, paymentMethods);
   }
   return csv;
 }
 
 export function parseCsv(csvString: string): ParsedCsv {
-  const markerIdx = csvString.indexOf(RECURRING_SECTION_MARKER);
+  const recurringIdx = csvString.indexOf(RECURRING_SECTION_MARKER);
+  const settingsIdx = csvString.indexOf(SETTINGS_SECTION_MARKER);
 
-  const txSection = markerIdx === -1 ? csvString : csvString.slice(0, markerIdx);
+  // Determine transaction section end
+  const txEnd = recurringIdx !== -1 ? recurringIdx : settingsIdx !== -1 ? settingsIdx : csvString.length;
+  const txSection = csvString.slice(0, txEnd);
   const parsed = Papa.parse<Record<string, string>>(txSection, { header: true, skipEmptyLines: true });
   const transactions: CsvRow[] = parsed.data
     .filter(row => row["날짜"])
@@ -80,8 +106,9 @@ export function parseCsv(csvString: string): ParsedCsv {
     }));
 
   let recurringRules: CsvRecurringRow[] = [];
-  if (markerIdx !== -1) {
-    const rrSection = csvString.slice(markerIdx + RECURRING_SECTION_MARKER.length);
+  if (recurringIdx !== -1) {
+    const rrEnd = settingsIdx !== -1 ? settingsIdx : csvString.length;
+    const rrSection = csvString.slice(recurringIdx + RECURRING_SECTION_MARKER.length, rrEnd);
     const rrParsed = Papa.parse<Record<string, string>>(rrSection, { header: true, skipEmptyLines: true });
     recurringRules = rrParsed.data
       .filter(row => row["금액"])
@@ -96,7 +123,25 @@ export function parseCsv(csvString: string): ParsedCsv {
       }));
   }
 
-  return { transactions, recurringRules };
+  let settings: CsvSettings | undefined;
+  if (settingsIdx !== -1) {
+    const settingsSection = csvString.slice(settingsIdx + SETTINGS_SECTION_MARKER.length);
+    const sParsed = Papa.parse<Record<string, string>>(settingsSection, { header: true, skipEmptyLines: true });
+    const map: Record<string, string> = {};
+    for (const row of sParsed.data) {
+      if (row["항목"] && row["값"]) {
+        map[row["항목"]] = row["값"];
+      }
+    }
+    if (map["카테고리"] || map["결제수단"]) {
+      settings = {
+        categories: map["카테고리"] ? map["카테고리"].split("|").filter(Boolean) : [],
+        paymentMethods: map["결제수단"] ? map["결제수단"].split("|").filter(Boolean) : []
+      };
+    }
+  }
+
+  return { transactions, recurringRules, settings };
 }
 
 export function buildTemplateCsv(): string {
@@ -104,7 +149,10 @@ export function buildTemplateCsv(): string {
   const txExample = "2025-01-15,지출,12000,식비,카드,점심식사";
   const rrHeader = "유형,금액,카테고리,결제수단,메모,반복일,활성";
   const rrExample = "지출,50000,통신비,계좌이체,휴대폰요금,25,Y";
-  return `${txHeader}\n${txExample}\n\n${RECURRING_SECTION_MARKER}\n${rrHeader}\n${rrExample}`;
+  const stHeader = "항목,값";
+  const stCategories = "카테고리,식비|교통비|주거비|통신비";
+  const stMethods = "결제수단,현금|카드|계좌이체";
+  return `${txHeader}\n${txExample}\n\n${RECURRING_SECTION_MARKER}\n${rrHeader}\n${rrExample}\n\n${SETTINGS_SECTION_MARKER}\n${stHeader}\n${stCategories}\n${stMethods}`;
 }
 
 // Legacy exports for backward compatibility

@@ -1,10 +1,13 @@
 import React, { useState, useCallback } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from "react-native";
+import { useSetAtom } from "jotai";
 import { useTheme } from "../../styles/theme";
 import { getPaymentMethods, setPaymentMethods } from "../../store/settings";
+import { dbVersionAtom } from "../../store/atoms";
 
 export function PaymentMethodManager(): React.JSX.Element {
   const theme = useTheme();
+  const setDbVersion = useSetAtom(dbVersionAtom);
   const [methods, setMethodsState] = useState<string[]>(() => getPaymentMethods());
   const [newMethod, setNewMethod] = useState("");
 
@@ -20,8 +23,9 @@ export function PaymentMethodManager(): React.JSX.Element {
     const updated = [...methods, trimmed];
     setPaymentMethods(updated);
     setMethodsState(updated);
+    setDbVersion(v => v + 1);
     setNewMethod("");
-  }, [newMethod, methods]);
+  }, [newMethod, methods, setDbVersion]);
 
   const handleDelete = useCallback(
     (method: string) => {
@@ -34,11 +38,12 @@ export function PaymentMethodManager(): React.JSX.Element {
             const updated = methods.filter(m => m !== method);
             setPaymentMethods(updated);
             setMethodsState(updated);
+            setDbVersion(v => v + 1);
           }
         }
       ]);
     },
-    [methods]
+    [methods, setDbVersion]
   );
 
   return (
@@ -68,7 +73,7 @@ export function PaymentMethodManager(): React.JSX.Element {
           onPress={handleAdd}
           activeOpacity={0.7}
         >
-          <Text style={[styles.addBtnText, { color: "#fff" }]}>추가</Text>
+          <Text style={[styles.addBtnText, { color: theme.fabText }]}>추가</Text>
         </TouchableOpacity>
       </View>
     </View>
