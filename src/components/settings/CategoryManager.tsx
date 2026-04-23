@@ -7,11 +7,14 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
+import {useSetAtom} from 'jotai';
 import {useTheme} from '../../styles/theme';
 import {getCategories, setCategories} from '../../store/settings';
+import {dbVersionAtom} from '../../store/atoms';
 
 export function CategoryManager(): React.JSX.Element {
   const theme = useTheme();
+  const setDbVersion = useSetAtom(dbVersionAtom);
   const [categories, setCategoriesState] = useState<string[]>(() => getCategories());
   const [newCategory, setNewCategory] = useState('');
 
@@ -25,14 +28,15 @@ export function CategoryManager(): React.JSX.Element {
     const updated = [...categories, trimmed];
     setCategories(updated);
     setCategoriesState(updated);
+    setDbVersion(v => v + 1);
     setNewCategory('');
-  }, [newCategory, categories]);
+  }, [newCategory, categories, setDbVersion]);
 
   const handleDelete = useCallback(
     (category: string) => {
       Alert.alert(
         '카테고리 삭제',
-        `"${category}" 카테고리를 삭제하시겠습니까?`,
+        `"${category}" 카테고리를 삭제하시겠습니까?\n기존 내역은 유지됩니다.`,
         [
           {text: '취소', style: 'cancel'},
           {
@@ -42,12 +46,13 @@ export function CategoryManager(): React.JSX.Element {
               const updated = categories.filter(c => c !== category);
               setCategories(updated);
               setCategoriesState(updated);
+              setDbVersion(v => v + 1);
             },
           },
         ],
       );
     },
-    [categories],
+    [categories, setDbVersion],
   );
 
   return (

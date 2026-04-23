@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import {FlashList} from '@shopify/flash-list';
 import {useAtom, useAtomValue} from 'jotai';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {useTheme} from '../styles/theme';
 import {historyFilterAtom, dbVersionAtom} from '../store/atoms';
@@ -24,7 +23,6 @@ const PAGE_SIZE = 50;
 
 export function HistoryScreen(): React.JSX.Element {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
 
   const [filter, setFilter] = useAtom(historyFilterAtom);
   const dbVersion = useAtomValue(dbVersionAtom);
@@ -90,20 +88,9 @@ export function HistoryScreen(): React.JSX.Element {
     }
   }, [allLoaded, page, filter, searchText, ledgerId]);
 
-  const handleLongPress = useCallback(
+  const handleDelete = useCallback(
     (transaction: Transaction) => {
-      Alert.alert(
-        '거래 삭제',
-        `"${transaction.category}" 거래를 삭제하시겠습니까?`,
-        [
-          {text: '취소', style: 'cancel'},
-          {
-            text: '삭제',
-            style: 'destructive',
-            onPress: () => remove(transaction.id),
-          },
-        ],
-      );
+      remove(transaction.id);
     },
     [remove],
   );
@@ -117,10 +104,10 @@ export function HistoryScreen(): React.JSX.Element {
       <TransactionItem
         transaction={item}
         onPress={handlePress}
-        onLongPress={handleLongPress}
+        onDelete={handleDelete}
       />
     ),
-    [handlePress, handleLongPress],
+    [handlePress, handleDelete],
   );
 
   const keyExtractor = useCallback((item: Transaction) => item.id, []);
@@ -129,7 +116,7 @@ export function HistoryScreen(): React.JSX.Element {
   const isExpenseActive = filter.type === 'expense';
 
   return (
-    <View style={[styles.container, {backgroundColor: theme.background, paddingTop: insets.top}]}>
+    <View style={[styles.container, {backgroundColor: theme.background}]}>
       {/* Title */}
       <View style={[styles.titleRow, {borderBottomColor: theme.border}]}>
         <Text style={[styles.title, {color: theme.text}]}>내역</Text>

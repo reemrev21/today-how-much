@@ -1,5 +1,5 @@
 import React from 'react';
-import {TouchableOpacity, Text, StyleSheet, Platform} from 'react-native';
+import {TouchableOpacity, Text, StyleSheet} from 'react-native';
 import {useTheme} from '../../styles/theme';
 
 interface FABProps {
@@ -11,13 +11,10 @@ export function FAB({onPress}: FABProps): React.JSX.Element {
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={[styles.fab, {backgroundColor: theme.fab}, Platform.select({
-        ios: styles.shadowIos,
-        android: styles.shadowAndroid,
-      })]}
+      style={[styles.fab, {backgroundColor: theme.ink, borderColor: theme.ink}]}
       activeOpacity={0.8}
     >
-      <Text style={[styles.plus, {color: theme.fabText}]}>+</Text>
+      <Text style={[styles.plus, {color: theme.card}]}>+</Text>
     </TouchableOpacity>
   );
 }
@@ -26,22 +23,14 @@ const styles = StyleSheet.create({
   fab: {
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 0,
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  shadowIos: {
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  shadowAndroid: {
-    elevation: 6,
   },
   plus: {
     fontSize: 28,
     lineHeight: 32,
-    fontWeight: '400',
+    fontWeight: '300',
   },
 });

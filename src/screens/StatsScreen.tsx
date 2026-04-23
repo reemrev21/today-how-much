@@ -1,7 +1,6 @@
 import React, {useMemo} from 'react';
 import {View, Text, TouchableOpacity, ScrollView, StyleSheet} from 'react-native';
 import {useAtom, useAtomValue} from 'jotai';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import dayjs from 'dayjs';
 
 import {useTheme} from '../styles/theme';
@@ -19,7 +18,6 @@ import {PaymentMethodChart} from '../components/chart/PaymentMethodChart';
 
 export function StatsScreen(): React.JSX.Element {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
 
   const selectedMonth = useAtomValue(selectedMonthAtom);
   const [period, setPeriod] = useAtom(statsPeriodAtom);
@@ -52,7 +50,7 @@ export function StatsScreen(): React.JSX.Element {
     : `${currentYear}년`;
 
   return (
-    <View style={[styles.container, {backgroundColor: theme.background, paddingTop: insets.top}]}>
+    <View style={[styles.container, {backgroundColor: theme.background}]}>
       {/* Title */}
       <View style={[styles.titleRow, {borderBottomColor: theme.border}]}>
         <Text style={[styles.title, {color: theme.text}]}>통계</Text>

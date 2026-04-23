@@ -29,6 +29,7 @@ export interface RecurringRule {
   memo: string | null;
   day_of_month: number;
   is_active: boolean;
+  sort_order: number;
 }
 
 export interface DaySummary {

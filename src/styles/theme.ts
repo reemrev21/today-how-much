@@ -2,22 +2,59 @@ import {useColorScheme} from 'react-native';
 import {useMemo} from 'react';
 import {getThemeMode} from '../store/settings';
 
+// Brutalist monochrome tokens
 const light = {
-  background: '#FFFFFF', surface: '#F5F5F5', card: '#FFFFFF',
-  text: '#1A1A1A', textSecondary: '#888888', border: '#E0E0E0',
-  income: '#2E7D32', expense: '#D32F2F',
-  primary: '#5C6BC0', primaryLight: '#E8EAF6',
-  tabBar: '#FFFFFF', tabBarBorder: '#E0E0E0',
-  fab: '#5C6BC0', fabText: '#FFFFFF',
+  // Core
+  ink: '#0A0A0A',
+  paper: '#FAFAFA',
+  card: '#FFFFFF',
+  mute1: '#737373',
+  mute2: '#A3A3A3',
+  mute3: '#525252',
+  rule: '#E5E5E5',
+  hair: '#262626',
+
+  // Semantic aliases (backward compat)
+  background: '#FAFAFA',
+  surface: '#FFFFFF',
+  text: '#0A0A0A',
+  textSecondary: '#737373',
+  border: '#E5E5E5',
+  income: '#737373',   // mute1 — income is subdued
+  expense: '#0A0A0A',  // ink — expense is bold
+  primary: '#0A0A0A',
+  primaryLight: '#E5E5E5',
+  tabBar: '#FFFFFF',
+  tabBarBorder: '#0A0A0A',
+  fab: '#0A0A0A',
+  fabText: '#FFFFFF',
 };
 
 const dark = {
-  background: '#1A1A2E', surface: '#252545', card: '#2A2A4A',
-  text: '#E0E0E0', textSecondary: '#888888', border: '#3A3A5A',
-  income: '#51CF66', expense: '#FF6B6B',
-  primary: '#7C6EF0', primaryLight: '#3A3A6A',
-  tabBar: '#1E1E3A', tabBarBorder: '#2A2A4A',
-  fab: '#7C6EF0', fabText: '#FFFFFF',
+  // Core
+  ink: '#F5F5F5',
+  paper: '#0A0A0A',
+  card: '#1A1A1A',
+  mute1: '#A3A3A3',
+  mute2: '#737373',
+  mute3: '#D4D4D4',
+  rule: '#333333',
+  hair: '#D4D4D4',
+
+  // Semantic aliases
+  background: '#0A0A0A',
+  surface: '#1A1A1A',
+  text: '#F5F5F5',
+  textSecondary: '#A3A3A3',
+  border: '#333333',
+  income: '#A3A3A3',
+  expense: '#F5F5F5',
+  primary: '#F5F5F5',
+  primaryLight: '#333333',
+  tabBar: '#1A1A1A',
+  tabBarBorder: '#F5F5F5',
+  fab: '#F5F5F5',
+  fabText: '#0A0A0A',
 };
 
 export type Theme = typeof light;

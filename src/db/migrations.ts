@@ -42,7 +42,15 @@ export function runMigrations(): void {
       memo TEXT,
       day_of_month INTEGER NOT NULL CHECK(day_of_month BETWEEN 1 AND 31),
       is_active INTEGER NOT NULL DEFAULT 1,
+      sort_order INTEGER NOT NULL DEFAULT 0,
       FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE
     );
   `);
+
+  // Migration: add sort_order to existing recurring_rules
+  try {
+    db.executeSync('ALTER TABLE recurring_rules ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0');
+  } catch (_) {
+    // column already exists
+  }
 }

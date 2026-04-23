@@ -1,6 +1,6 @@
 import React, {useCallback, useRef, useState} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {View, Text, Pressable, StyleSheet, Keyboard} from 'react-native';
+
 import {useAtom, useAtomValue} from 'jotai';
 import dayjs from 'dayjs';
 import BottomSheet, {BottomSheetView, BottomSheetBackdrop} from '@gorhom/bottom-sheet';
@@ -22,20 +22,19 @@ import type {Transaction} from '../types';
 
 export function CalendarScreen(): React.JSX.Element {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
 
   const [yearMonth, setYearMonth] = useAtom(selectedMonthAtom);
   const [selectedDate, setSelectedDate] = useAtom(selectedDateAtom);
   const dbVersion = useAtomValue(dbVersionAtom);
-  const {update} = useTransactions();
+  const {add, update, remove} = useTransactions();
 
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>();
+  const [formDate, setFormDate] = useState<string | undefined>();
   const listSheetRef = useRef<BottomSheet>(null);
   const editSheetRef = useRef<BottomSheet>(null);
 
   const ledgerId = getCurrentLedgerId() ?? '';
 
-  // Re-derive summaries whenever month or db changes
   const summaries = React.useMemo(() => {
     if (!ledgerId) {return [];}
     return getMonthDaySummaries(ledgerId, yearMonth);
@@ -48,10 +47,26 @@ export function CalendarScreen(): React.JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ledgerId, yearMonth, dbVersion]);
 
+  const thisMonth = dayjs().format('YYYY-MM');
+
+  // Hero always shows THIS month, not the selected month
+  const thisMonthTotals = React.useMemo(() => {
+    if (!ledgerId) {return {income: 0, expense: 0};}
+    return getMonthTotals(ledgerId, thisMonth);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ledgerId, thisMonth, dbVersion]);
+
   const todayStr = dayjs().format('YYYY-MM-DD');
   const todaySummary = React.useMemo(() => {
-    return summaries.find(s => s.date === todayStr);
-  }, [summaries, todayStr]);
+    // If viewing this month, use summaries; otherwise query directly
+    if (yearMonth === thisMonth) {
+      return summaries.find(s => s.date === todayStr);
+    }
+    const daySummaries = getMonthDaySummaries(ledgerId, thisMonth);
+    return daySummaries.find(s => s.date === todayStr);
+  }, [summaries, todayStr, yearMonth, thisMonth, ledgerId]);
+
+  const todayExpense = todaySummary?.expense ?? 0;
 
   const handlePrev = useCallback(() => {
     setYearMonth(prev => dayjs(`${prev}-01`).subtract(1, 'month').format('YYYY-MM'));
@@ -76,6 +91,14 @@ export function CalendarScreen(): React.JSX.Element {
     [selectedDate, setSelectedDate],
   );
 
+  const handleAddForDate = useCallback(() => {
+    if (!selectedDate) {return;}
+    setEditingTransaction(undefined);
+    setFormDate(selectedDate);
+    listSheetRef.current?.close();
+    setTimeout(() => editSheetRef.current?.expand(), 200);
+  }, [selectedDate]);
+
   const handleEdit = useCallback(
     (transaction: Transaction) => {
       setEditingTransaction(transaction);
@@ -87,6 +110,7 @@ export function CalendarScreen(): React.JSX.Element {
 
   const handleSave = useCallback(
     (params: Omit<Transaction, 'id' | 'created_at'>) => {
+      Keyboard.dismiss();
       if (editingTransaction) {
         update(editingTransaction.id, {
           type: params.type,
@@ -96,17 +120,30 @@ export function CalendarScreen(): React.JSX.Element {
           memo: params.memo,
           date: params.date,
         });
+      } else {
+        add(params);
       }
       setEditingTransaction(undefined);
+      setFormDate(undefined);
       editSheetRef.current?.close();
     },
-    [editingTransaction, update],
+    [editingTransaction, update, add],
   );
 
   const handleCancel = useCallback(() => {
+    Keyboard.dismiss();
     setEditingTransaction(undefined);
     editSheetRef.current?.close();
   }, []);
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      remove(id);
+      setEditingTransaction(undefined);
+      editSheetRef.current?.close();
+    },
+    [remove],
+  );
 
   const renderBackdrop = useCallback(
     (props: any) => (
@@ -120,51 +157,67 @@ export function CalendarScreen(): React.JSX.Element {
     [],
   );
 
+  const todayDay = dayjs();
+  const heroDateStr = todayDay.format('MM.DD');
+  const heroDayName = ['\uC77C', '\uC6D4', '\uD654', '\uC218', '\uBAA9', '\uAE08', '\uD1A0'][todayDay.day()];
+
   return (
-    <View style={[styles.container, {backgroundColor: theme.background, paddingTop: insets.top}]}>
-      {/* Top bar: Ledger selector */}
-      <View style={[styles.topBar, {borderBottomColor: theme.border}]}>
-        <Text style={[styles.appName, {color: theme.text}]}>오늘얼마</Text>
+    <View style={[styles.container, {backgroundColor: theme.paper}]}>
+      {/* === BrutHeader === */}
+      <View style={[styles.header, {borderBottomColor: theme.ink}]}>
+        <Text style={[styles.appTitle, {color: theme.ink}]}>{'\uC624\uB298\uC5BC\uB9C8'}</Text>
         <LedgerSelector />
       </View>
 
-      {/* Today + Month summary */}
-      <View style={[styles.summaryCard, {backgroundColor: theme.surface}]}>
-        <View style={styles.summaryCol}>
-          <Text style={[styles.summaryLabel, {color: theme.textSecondary}]}>오늘 지출</Text>
-          <Text style={[styles.summaryValue, {color: theme.expense}]}>
-            {todaySummary?.expense ? formatAmount(todaySummary.expense) : '0'}
+      {/* === BrutTodayHero — black block === */}
+      <View style={[styles.hero, {backgroundColor: theme.ink}]}>
+        {/* Top row: today */}
+        <View style={styles.heroRow}>
+          <View style={styles.heroLabelRow}>
+            <View style={[styles.heroSquare, {backgroundColor: theme.card}]} />
+            <Text style={[styles.heroEyebrowText, {color: theme.mute2}]}>
+              {'\uC624\uB298 \u00B7 '}{heroDateStr} {heroDayName}
+            </Text>
+          </View>
+          <Text style={[styles.heroAmount, {color: theme.card}]}>
+            {todayExpense > 0 ? `\u2212${formatAmount(todayExpense)}` : '0'}
           </Text>
         </View>
-        <View style={[styles.summaryVertDivider, {backgroundColor: theme.border}]} />
-        <View style={styles.summaryCol}>
-          <Text style={[styles.summaryLabel, {color: theme.textSecondary}]}>
-            {dayjs(`${yearMonth}-01`).format('M월')} 지출
+        {/* Divider */}
+        <View style={[styles.heroDivider, {backgroundColor: theme.hair}]} />
+        {/* Bottom row: month total */}
+        <View style={styles.heroRow}>
+          <Text style={[styles.heroEyebrowText, {color: theme.mute2}]}>
+            {dayjs(`${thisMonth}-01`).format('M')}{'\uC6D4 \uD569\uACC4'}
           </Text>
-          <Text style={[styles.summaryValue, {color: theme.expense}]}>
-            {monthTotals.expense ? formatAmount(monthTotals.expense) : '0'}
-          </Text>
-        </View>
-        <View style={[styles.summaryVertDivider, {backgroundColor: theme.border}]} />
-        <View style={styles.summaryCol}>
-          <Text style={[styles.summaryLabel, {color: theme.textSecondary}]}>
-            {dayjs(`${yearMonth}-01`).format('M월')} 수입
-          </Text>
-          <Text style={[styles.summaryValue, {color: theme.income}]}>
-            {monthTotals.income ? formatAmount(monthTotals.income) : '0'}
-          </Text>
+          <View style={styles.heroMonthTotals}>
+            <Text style={[styles.heroMonthValue, {color: theme.mute2}]}>
+              +{formatAmount(thisMonthTotals.income)}
+            </Text>
+            <Text style={[styles.heroMonthValue, {color: theme.card}]}>
+              {'\u2212'}{formatAmount(thisMonthTotals.expense)}
+            </Text>
+          </View>
         </View>
       </View>
 
-      {/* Month navigation */}
-      <MonthHeader yearMonth={yearMonth} onPrev={handlePrev} onNext={handleNext} />
+      {/* === BrutMonthBar === */}
+      <MonthHeader
+        yearMonth={yearMonth}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        monthIncome={monthTotals.income}
+        monthExpense={monthTotals.expense}
+      />
 
-      {/* Calendar grid */}
+      {/* === Calendar grid === */}
       <CalendarGrid
         yearMonth={yearMonth}
         selectedDate={selectedDate}
         summaries={summaries}
         onDayPress={handleDayPress}
+        onPrev={handlePrev}
+        onNext={handleNext}
       />
 
       {/* Transaction list bottom sheet */}
@@ -173,16 +226,24 @@ export function CalendarScreen(): React.JSX.Element {
         index={-1}
         snapPoints={['35%', '60%']}
         enablePanDownToClose
-        backgroundStyle={{backgroundColor: theme.surface}}
-        handleIndicatorStyle={{backgroundColor: theme.textSecondary}}
+        backgroundStyle={{backgroundColor: theme.card}}
+        handleIndicatorStyle={{backgroundColor: theme.mute2}}
         onClose={() => setSelectedDate(null)}
       >
         <BottomSheetView style={styles.sheetContent}>
           {selectedDate && (
             <>
-              <Text style={[styles.dateLabel, {color: theme.textSecondary}]}>
-                {dayjs(selectedDate).format('M월 D일 (ddd)')}
-              </Text>
+              <View style={styles.sheetHeader}>
+                <Text style={[styles.dateLabel, {color: theme.ink}]}>
+                  {dayjs(selectedDate).format('MM.DD')} {['\uC77C', '\uC6D4', '\uD654', '\uC218', '\uBAA9', '\uAE08', '\uD1A0'][dayjs(selectedDate).day()]}
+                </Text>
+                <Pressable
+                  style={[styles.addBtn, {backgroundColor: theme.ink}]}
+                  onPress={handleAddForDate}
+                >
+                  <Text style={[styles.addBtnText, {color: theme.card}]}>+ 추가</Text>
+                </Pressable>
+              </View>
               <TransactionList
                 ledgerId={ledgerId}
                 date={selectedDate}
@@ -199,20 +260,20 @@ export function CalendarScreen(): React.JSX.Element {
         index={-1}
         snapPoints={['85%']}
         enablePanDownToClose
+        keyboardBlurBehavior="restore"
         backdropComponent={renderBackdrop}
-        backgroundStyle={{backgroundColor: theme.surface}}
-        handleIndicatorStyle={{backgroundColor: theme.textSecondary}}
+        backgroundStyle={{backgroundColor: theme.card}}
+        handleIndicatorStyle={{backgroundColor: theme.mute2}}
         onClose={handleCancel}
       >
-        <BottomSheetView style={styles.sheetContent}>
-          <TransactionForm
-            ledgerId={ledgerId}
-            initialDate={selectedDate ?? undefined}
-            editTransaction={editingTransaction}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
-        </BottomSheetView>
+        <TransactionForm
+          ledgerId={ledgerId}
+          initialDate={formDate ?? selectedDate ?? undefined}
+          editTransaction={editingTransaction}
+          onSave={handleSave}
+          onCancel={handleCancel}
+          onDelete={handleDelete}
+        />
       </BottomSheet>
     </View>
   );
@@ -220,35 +281,88 @@ export function CalendarScreen(): React.JSX.Element {
 
 const styles = StyleSheet.create({
   container: {flex: 1},
-  topBar: {
+
+  // BrutHeader
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: 2,
   },
-  appName: {fontSize: 18, fontWeight: '700'},
-  summaryCard: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    marginTop: 8,
-    borderRadius: 12,
-    padding: 14,
+  appTitle: {
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: -0.88,
   },
-  summaryCol: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
-  summaryLabel: {fontSize: 11, fontWeight: '500'},
-  summaryValue: {fontSize: 15, fontWeight: '700'},
-  summaryVertDivider: {width: StyleSheet.hairlineWidth, marginHorizontal: 4},
-  dateLabel: {
-    fontSize: 13,
-    fontWeight: '500',
+
+  // BrutTodayHero
+  hero: {
+    paddingVertical: 14,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    gap: 10,
+  },
+  heroRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  heroLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  heroSquare: {
+    width: 6,
+    height: 6,
+  },
+  heroEyebrowText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.8,
+  },
+  heroAmount: {
+    fontSize: 28,
+    fontWeight: '900',
+    letterSpacing: -1.4,
+    fontVariant: ['tabular-nums'],
+  },
+  heroDivider: {
+    height: 1,
+  },
+  heroMonthTotals: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  heroMonthValue: {
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+    fontVariant: ['tabular-nums'],
+  },
+
+  // BottomSheet
+  sheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  dateLabel: {
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: -0.28,
+    fontVariant: ['tabular-nums'],
+  },
+  addBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  addBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
   },
   sheetContent: {flex: 1},
 });

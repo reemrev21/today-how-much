@@ -1,15 +1,18 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect, useRef, useMemo} from 'react';
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
+  Pressable,
   StyleSheet,
   Alert,
+  Keyboard,
 } from 'react-native';
+import {BottomSheetTextInput, BottomSheetScrollView} from '@gorhom/bottom-sheet';
+import {useAtomValue} from 'jotai';
 import {useTheme} from '../../styles/theme';
+import {formatAmountInput} from '../../utils/format';
 import {getCategories, getPaymentMethods, getCurrentLedgerId} from '../../store/settings';
+import {dbVersionAtom} from '../../store/atoms';
 import type {Transaction, TransactionType} from '../../types';
 
 const INCOME_CATEGORIES = ['월급', '부수입', '용돈', '기타수입'];
@@ -21,6 +24,7 @@ interface TransactionFormProps {
   editTransaction?: Transaction;
   onSave: (params: Omit<Transaction, 'id' | 'created_at'>) => void;
   onCancel: () => void;
+  onDelete?: (id: string) => void;
 }
 
 function todayString(): string {
@@ -45,16 +49,20 @@ export function TransactionForm({
   editTransaction,
   onSave,
   onCancel,
+  onDelete,
 }: TransactionFormProps): React.JSX.Element {
   const theme = useTheme();
   const ledgerId = ledgerIdProp ?? getCurrentLedgerId() ?? '';
+  const dbVersion = useAtomValue(dbVersionAtom);
 
-  const allCategories = getCategories();
-  const allPaymentMethods = getPaymentMethods();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allCategories = useMemo(() => getCategories(), [dbVersion]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allPaymentMethods = useMemo(() => getPaymentMethods(), [dbVersion]);
 
   const [type, setType] = useState<TransactionType>(editTransaction?.type ?? 'expense');
   const [amountText, setAmountText] = useState(
-    editTransaction ? String(editTransaction.amount) : '',
+    editTransaction ? formatAmountInput(String(editTransaction.amount)) : '',
   );
   const [date, setDate] = useState(
     editTransaction?.date ?? initialDate ?? todayString(),
@@ -64,6 +72,41 @@ export function TransactionForm({
     editTransaction?.payment_method ?? allPaymentMethods[0] ?? '',
   );
   const [memo, setMemo] = useState(editTransaction?.memo ?? '');
+
+  // Track previous editTransaction.id to detect actual changes
+  const prevEditIdRef = useRef<string | undefined>(editTransaction?.id);
+  const prevInitialDateRef = useRef<string | undefined>(initialDate);
+
+  useEffect(() => {
+    const prevId = prevEditIdRef.current;
+    const prevDate = prevInitialDateRef.current;
+    const currId = editTransaction?.id;
+
+    prevEditIdRef.current = currId;
+    prevInitialDateRef.current = initialDate;
+
+    // Same edit transaction — skip
+    if (currId && currId === prevId) {return;}
+
+    if (editTransaction) {
+      setType(editTransaction.type);
+      setAmountText(formatAmountInput(String(editTransaction.amount)));
+      setDate(editTransaction.date);
+      setCategory(editTransaction.category);
+      setPaymentMethod(editTransaction.payment_method);
+      setMemo(editTransaction.memo ?? '');
+    } else if (prevId !== undefined || prevDate !== initialDate) {
+      // Only reset when transitioning from edit→add or initialDate actually changed
+      const methods = getPaymentMethods();
+      setType('expense');
+      setAmountText('');
+      setDate(initialDate ?? todayString());
+      setCategory('');
+      setPaymentMethod(methods[0] ?? '');
+      setMemo('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editTransaction?.id, initialDate]);
 
   const categories = filterCategories(allCategories, type);
 
@@ -76,6 +119,7 @@ export function TransactionForm({
   );
 
   const handleSave = useCallback(() => {
+    Keyboard.dismiss();
     const amount = parseInt(amountText.replace(/,/g, ''), 10);
     if (!amountText || isNaN(amount) || amount <= 0) {
       Alert.alert('오류', '금액을 올바르게 입력해 주세요.');
@@ -100,10 +144,22 @@ export function TransactionForm({
     });
   }, [amountText, category, date, ledgerId, memo, onSave, paymentMethod, type]);
 
-  const amountColor = type === 'income' ? theme.income : theme.expense;
+  const handleDelete = useCallback(() => {
+    if (!editTransaction || !onDelete) {return;}
+    Alert.alert('거래 삭제', '이 거래를 삭제하시겠습니까?', [
+      {text: '취소', style: 'cancel'},
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: () => onDelete(editTransaction.id),
+      },
+    ]);
+  }, [editTransaction, onDelete]);
+
+  const amountColor = theme.primary;
 
   return (
-    <ScrollView
+    <BottomSheetScrollView
       style={[styles.scroll, {backgroundColor: theme.surface}]}
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
@@ -115,39 +171,37 @@ export function TransactionForm({
 
       {/* Income / Expense toggle */}
       <View style={[styles.toggleRow, {backgroundColor: theme.background, borderColor: theme.border}]}>
-        <TouchableOpacity
+        <Pressable
           style={[
             styles.toggleBtn,
-            type === 'expense' && {backgroundColor: theme.expense},
+            type === 'expense' && {backgroundColor: theme.primary},
           ]}
           onPress={() => handleTypeChange('expense')}
-          activeOpacity={0.8}
         >
           <Text style={[styles.toggleText, type === 'expense' ? styles.toggleActive : {color: theme.textSecondary}]}>
             지출
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           style={[
             styles.toggleBtn,
-            type === 'income' && {backgroundColor: theme.income},
+            type === 'income' && {backgroundColor: theme.primary},
           ]}
           onPress={() => handleTypeChange('income')}
-          activeOpacity={0.8}
         >
           <Text style={[styles.toggleText, type === 'income' ? styles.toggleActive : {color: theme.textSecondary}]}>
             수입
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {/* Amount */}
       <View style={styles.section}>
         <Text style={[styles.label, {color: theme.textSecondary}]}>금액</Text>
-        <TextInput
+        <BottomSheetTextInput
           style={[styles.amountInput, {color: amountColor, borderColor: theme.border, backgroundColor: theme.background}]}
           value={amountText}
-          onChangeText={setAmountText}
+          onChangeText={t => setAmountText(formatAmountInput(t))}
           keyboardType="number-pad"
           placeholder="0"
           placeholderTextColor={theme.textSecondary}
@@ -157,7 +211,7 @@ export function TransactionForm({
       {/* Date */}
       <View style={styles.section}>
         <Text style={[styles.label, {color: theme.textSecondary}]}>날짜</Text>
-        <TextInput
+        <BottomSheetTextInput
           style={[styles.input, {color: theme.text, borderColor: theme.border, backgroundColor: theme.background}]}
           value={date}
           onChangeText={setDate}
@@ -175,7 +229,7 @@ export function TransactionForm({
           {categories.map(c => {
             const selected = c === category;
             return (
-              <TouchableOpacity
+              <Pressable
                 key={c}
                 style={[
                   styles.chip,
@@ -183,12 +237,12 @@ export function TransactionForm({
                   selected && {backgroundColor: amountColor},
                 ]}
                 onPress={() => setCategory(c)}
-                activeOpacity={0.7}
+      
               >
                 <Text style={[styles.chipText, {color: selected ? '#fff' : theme.text}]}>
                   {c}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </View>
@@ -201,7 +255,7 @@ export function TransactionForm({
           {allPaymentMethods.map(m => {
             const selected = m === paymentMethod;
             return (
-              <TouchableOpacity
+              <Pressable
                 key={m}
                 style={[
                   styles.chip,
@@ -209,12 +263,12 @@ export function TransactionForm({
                   selected && {backgroundColor: theme.primary},
                 ]}
                 onPress={() => setPaymentMethod(m)}
-                activeOpacity={0.7}
+      
               >
                 <Text style={[styles.chipText, {color: selected ? '#fff' : theme.text}]}>
                   {m}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </View>
@@ -223,7 +277,7 @@ export function TransactionForm({
       {/* Memo */}
       <View style={styles.section}>
         <Text style={[styles.label, {color: theme.textSecondary}]}>메모</Text>
-        <TextInput
+        <BottomSheetTextInput
           style={[styles.memoInput, {color: theme.text, borderColor: theme.border, backgroundColor: theme.background}]}
           value={memo}
           onChangeText={setMemo}
@@ -237,22 +291,33 @@ export function TransactionForm({
 
       {/* Buttons */}
       <View style={styles.buttons}>
-        <TouchableOpacity
+        <Pressable
           style={[styles.cancelBtn, {borderColor: theme.border}]}
           onPress={onCancel}
-          activeOpacity={0.7}
+
         >
           <Text style={[styles.cancelText, {color: theme.textSecondary}]}>취소</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           style={[styles.saveBtn, {backgroundColor: amountColor}]}
           onPress={handleSave}
-          activeOpacity={0.8}
+
         >
           <Text style={styles.saveText}>{editTransaction ? '수정' : '저장'}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
-    </ScrollView>
+
+      {/* Delete button (edit mode only) */}
+      {editTransaction && onDelete && (
+        <Pressable
+          style={styles.deleteBtn}
+          onPress={handleDelete}
+
+        >
+          <Text style={styles.deleteBtnText}>거래 삭제</Text>
+        </Pressable>
+      )}
+    </BottomSheetScrollView>
   );
 }
 
@@ -333,4 +398,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   saveText: {fontSize: 16, fontWeight: '700', color: '#fff'},
+  deleteBtn: {
+    marginTop: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  deleteBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#D32F2F',
+  },
 });

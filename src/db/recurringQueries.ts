@@ -9,11 +9,16 @@ export function createRecurringRule(params: {
 }): RecurringRule {
   const db = getDB();
   const id = uuid.v4() as string;
+  const maxOrder = (db.executeSync(
+    'SELECT COALESCE(MAX(sort_order), -1) as max_order FROM recurring_rules WHERE ledger_id = ?',
+    [params.ledger_id],
+  ).rows?.[0] as any)?.max_order ?? -1;
+  const sort_order = maxOrder + 1;
   db.executeSync(
-    `INSERT INTO recurring_rules (id, ledger_id, type, amount, category, payment_method, memo, day_of_month, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
-    [id, params.ledger_id, params.type, params.amount, params.category, params.payment_method, params.memo, params.day_of_month],
+    `INSERT INTO recurring_rules (id, ledger_id, type, amount, category, payment_method, memo, day_of_month, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,
+    [id, params.ledger_id, params.type, params.amount, params.category, params.payment_method, params.memo, params.day_of_month, sort_order],
   );
-  return {id, ...params, is_active: true};
+  return {id, ...params, is_active: true, sort_order};
 }
 
 export function updateRecurringRule(id: string, params: {
@@ -35,12 +40,19 @@ export function deleteRecurringRule(id: string): void {
 export function getRecurringRules(ledgerId: string): RecurringRule[] {
   const db = getDB();
   const result = db.executeSync(
-    'SELECT * FROM recurring_rules WHERE ledger_id = ? ORDER BY day_of_month ASC',
+    'SELECT * FROM recurring_rules WHERE ledger_id = ? ORDER BY sort_order ASC, day_of_month ASC',
     [ledgerId],
   );
   return ((result.rows ?? []) as Array<Omit<RecurringRule, 'is_active'> & {is_active: number}>).map(
     row => ({...row, is_active: row.is_active === 1}),
   );
+}
+
+export function reorderRecurringRules(orderedIds: string[]): void {
+  const db = getDB();
+  for (let i = 0; i < orderedIds.length; i++) {
+    db.executeSync('UPDATE recurring_rules SET sort_order = ? WHERE id = ?', [i, orderedIds[i]]);
+  }
 }
 
 export function processRecurringRules(ledgerId: string, lastCheck: string, today: string): number {

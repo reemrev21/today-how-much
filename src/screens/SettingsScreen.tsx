@@ -9,7 +9,6 @@ import {
   Platform,
 } from 'react-native';
 import {useAtom} from 'jotai';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
 import DocumentPicker from 'react-native-document-picker';
@@ -31,17 +30,15 @@ import {
   getTransactionsForExport,
   createTransaction,
 } from '../db/transactionQueries';
-import {transactionsToCsv, csvToTransactions} from '../utils/csv';
+import {getRecurringRules, createRecurringRule} from '../db/recurringQueries';
+import {buildExportCsv, parseCsv, buildTemplateCsv} from '../utils/csv';
 
 import {CategoryManager} from '../components/settings/CategoryManager';
 import {PaymentMethodManager} from '../components/settings/PaymentMethodManager';
-import {RecurringRuleManager} from '../components/settings/RecurringRuleManager';
-
 import type {ThemeMode, Ledger} from '../types';
 
 export function SettingsScreen(): React.JSX.Element {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
   const [, setDbVersion] = useAtom(dbVersionAtom);
 
   const [themeMode, setThemeModeState] = useState<ThemeMode>(() => getThemeMode());
@@ -137,7 +134,8 @@ export function SettingsScreen(): React.JSX.Element {
     }
     try {
       const transactions = getTransactionsForExport(ledgerId);
-      const csv = transactionsToCsv(transactions);
+      const rules = getRecurringRules(ledgerId);
+      const csv = buildExportCsv(transactions, rules);
       const fileName = `transactions_${new Date().toISOString().slice(0, 10)}.csv`;
       const filePath = `${RNFS.TemporaryDirectoryPath}/${fileName}`;
       await RNFS.writeFile(filePath, csv, 'utf8');
@@ -170,14 +168,17 @@ export function SettingsScreen(): React.JSX.Element {
         Platform.OS === 'android' ? filePath : decodeURIComponent(filePath.replace('file://', '')),
         'utf8',
       );
-      const rows = csvToTransactions(content);
-      if (rows.length === 0) {
+      const {transactions: rows, recurringRules: rrRows} = parseCsv(content);
+      if (rows.length === 0 && rrRows.length === 0) {
         Alert.alert('오류', '가져올 데이터가 없습니다.');
         return;
       }
+      const parts: string[] = [];
+      if (rows.length > 0) {parts.push(`거래 ${rows.length}건`);}
+      if (rrRows.length > 0) {parts.push(`반복거래 ${rrRows.length}건`);}
       Alert.alert(
         'CSV 가져오기',
-        `${rows.length}개의 거래를 가져오시겠습니까?`,
+        `${parts.join(', ')}을 가져오시겠습니까?`,
         [
           {text: '취소', style: 'cancel'},
           {
@@ -194,8 +195,19 @@ export function SettingsScreen(): React.JSX.Element {
                   date: row.date,
                 });
               }
+              for (const rr of rrRows) {
+                createRecurringRule({
+                  ledger_id: ledgerId,
+                  type: rr.type,
+                  amount: rr.amount,
+                  category: rr.category,
+                  payment_method: rr.payment_method,
+                  memo: rr.memo,
+                  day_of_month: rr.day_of_month,
+                });
+              }
               bump();
-              Alert.alert('완료', `${rows.length}개의 거래를 가져왔습니다.`);
+              Alert.alert('완료', `${parts.join(', ')}을 가져왔습니다.`);
             },
           },
         ],
@@ -207,6 +219,25 @@ export function SettingsScreen(): React.JSX.Element {
     }
   }, [bump]);
 
+  // --- CSV Template ---
+  const handleTemplate = useCallback(async () => {
+    try {
+      const csv = buildTemplateCsv();
+      const fileName = 'import_template.csv';
+      const filePath = `${RNFS.TemporaryDirectoryPath}/${fileName}`;
+      await RNFS.writeFile(filePath, csv, 'utf8');
+      await Share.open({
+        url: Platform.OS === 'android' ? `file://${filePath}` : filePath,
+        type: 'text/csv',
+        filename: fileName,
+      });
+    } catch (err: any) {
+      if (!Share.isCancel?.(err)) {
+        Alert.alert('오류', '템플릿 내보내기에 실패했습니다.');
+      }
+    }
+  }, []);
+
   const THEME_OPTIONS: {label: string; value: ThemeMode}[] = [
     {label: '시스템', value: 'system'},
     {label: '라이트', value: 'light'},
@@ -214,7 +245,7 @@ export function SettingsScreen(): React.JSX.Element {
   ];
 
   return (
-    <View style={[styles.container, {backgroundColor: theme.background, paddingTop: insets.top}]}>
+    <View style={[styles.container, {backgroundColor: theme.background}]}>
       {/* Title */}
       <View style={[styles.titleRow, {borderBottomColor: theme.border}]}>
         <Text style={[styles.title, {color: theme.text}]}>설정</Text>
@@ -293,12 +324,6 @@ export function SettingsScreen(): React.JSX.Element {
           <PaymentMethodManager />
         </View>
 
-        {/* --- 반복 거래 --- */}
-        <View style={[styles.section, {backgroundColor: theme.card, borderColor: theme.border}]}>
-          <Text style={[styles.sectionTitle, {color: theme.text}]}>반복 거래</Text>
-          <RecurringRuleManager />
-        </View>
-
         {/* --- 데이터 --- */}
         <View style={[styles.section, {backgroundColor: theme.card, borderColor: theme.border}]}>
           <Text style={[styles.sectionTitle, {color: theme.text}]}>데이터</Text>
@@ -315,6 +340,13 @@ export function SettingsScreen(): React.JSX.Element {
             activeOpacity={0.7}
           >
             <Text style={[styles.dataBtnText, {color: theme.primary}]}>CSV 가져오기</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.dataBtn, {backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.border}]}
+            onPress={handleTemplate}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.dataBtnText, {color: theme.textSecondary}]}>가져오기 템플릿 다운로드</Text>
           </TouchableOpacity>
         </View>
 

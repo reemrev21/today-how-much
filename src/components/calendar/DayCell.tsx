@@ -1,11 +1,11 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import {useTheme} from '../../styles/theme';
-import {formatAmount} from '../../utils/format';
+import {formatShort} from '../../utils/format';
 import type {DaySummary} from '../../types';
 
 interface DayCellProps {
-  date: string; // "YYYY-MM-DD"
+  date: string;
   dayNumber: number;
   isCurrentMonth: boolean;
   isToday: boolean;
@@ -25,41 +25,60 @@ export function DayCell({
 }: DayCellProps): React.JSX.Element {
   const theme = useTheme();
 
-  const dayNumColor = isSelected
-    ? theme.fabText
-    : isCurrentMonth
-    ? theme.text
-    : theme.textSecondary;
+  // Non-current-month cells get muted background
+  if (!isCurrentMonth) {
+    return (
+      <View style={[styles.cell, {backgroundColor: theme.rule}]}>
+        <Text style={[styles.dayNum, {color: theme.mute2, opacity: 0.4}]}>
+          {String(dayNumber).padStart(2, '0')}
+        </Text>
+      </View>
+    );
+  }
+
+  const isInverted = isToday || isSelected;
+  const bgColor = isInverted ? theme.ink : theme.card;
+  const dayColor = isInverted ? theme.card : theme.mute3;
+  const expenseColor = isInverted ? theme.card : theme.ink;
+  const incomeColor = isInverted ? theme.mute2 : theme.mute2;
 
   return (
     <TouchableOpacity
-      style={[styles.cell, isSelected && {backgroundColor: theme.primary}]}
+      style={[styles.cell, {backgroundColor: bgColor}]}
       onPress={() => onPress(date)}
       activeOpacity={0.7}
     >
-      {/* Today indicator ring */}
-      <View style={[styles.dayNumWrapper, isToday && !isSelected && {borderColor: theme.primary, borderWidth: 1.5, borderRadius: 12}]}>
-        <Text style={[styles.dayNum, {color: dayNumColor}, !isCurrentMonth && styles.faded]}>
-          {dayNumber}
+      {/* Top: date + NOW tag */}
+      <View style={styles.topRow}>
+        <Text style={[styles.dayNum, {color: dayColor}]}>
+          {String(dayNumber).padStart(2, '0')}
         </Text>
+        {isToday && (
+          <View style={[styles.nowBadge, {backgroundColor: isInverted ? theme.card : theme.ink}]}>
+            <Text style={[styles.nowText, {color: isInverted ? theme.ink : theme.card}]}>
+              NOW
+            </Text>
+          </View>
+        )}
       </View>
 
-      {/* Income amount */}
-      {summary && summary.income > 0 ? (
-        <Text style={[styles.amount, {color: isSelected ? theme.fabText : theme.income}]} numberOfLines={1}>
-          {formatAmount(summary.income)}
-        </Text>
-      ) : (
-        <View style={styles.amountPlaceholder} />
-      )}
+      {/* Bottom: amounts pushed down */}
+      <View style={styles.bottomArea}>
+        {summary && summary.income > 0 && (
+          <Text style={[styles.incomeText, {color: incomeColor}]} numberOfLines={1}>
+            +{formatShort(summary.income)}
+          </Text>
+        )}
+        {summary && summary.expense > 0 && (
+          <Text style={[styles.expenseText, {color: expenseColor}]} numberOfLines={1}>
+            {'\u2212'}{formatShort(summary.expense)}
+          </Text>
+        )}
+      </View>
 
-      {/* Expense amount */}
-      {summary && summary.expense > 0 ? (
-        <Text style={[styles.amount, {color: isSelected ? theme.fabText : theme.expense}]} numberOfLines={1}>
-          {formatAmount(summary.expense)}
-        </Text>
-      ) : (
-        <View style={styles.amountPlaceholder} />
+      {/* Selected (not today) inset border */}
+      {isSelected && isToday && (
+        <View style={[styles.insetBorder, {borderColor: theme.card}]} />
       )}
     </TouchableOpacity>
   );
@@ -68,32 +87,53 @@ export function DayCell({
 const styles = StyleSheet.create({
   cell: {
     flex: 1,
-    alignItems: 'center',
-    paddingVertical: 4,
-    paddingHorizontal: 1,
-    minHeight: 64,
-    borderRadius: 6,
+    minHeight: 70,
+    padding: 4,
+    paddingBottom: 3,
+    justifyContent: 'space-between',
   },
-  dayNumWrapper: {
-    width: 24,
-    height: 24,
+  topRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 2,
+    gap: 2,
   },
   dayNum: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: -0.24,
+    fontVariant: ['tabular-nums'],
   },
-  faded: {
-    opacity: 0.35,
+  nowBadge: {
+    paddingHorizontal: 3,
+    paddingVertical: 1,
   },
-  amount: {
+  nowText: {
+    fontSize: 7,
+    fontWeight: '800',
+    letterSpacing: 1.05,
+  },
+  bottomArea: {
+    marginTop: 'auto',
+    alignItems: 'flex-end',
+  },
+  incomeText: {
     fontSize: 9,
-    fontWeight: '500',
-    textAlign: 'center',
+    fontWeight: '600',
+    letterSpacing: -0.18,
+    fontVariant: ['tabular-nums'],
   },
-  amountPlaceholder: {
-    height: 12,
+  expenseText: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: -0.33,
+    fontVariant: ['tabular-nums'],
+  },
+  insetBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderWidth: 2,
   },
 });

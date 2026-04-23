@@ -1,83 +1,60 @@
-import React, {useCallback, useRef} from 'react';
+import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import BottomSheet, {BottomSheetView, BottomSheetBackdrop} from '@gorhom/bottom-sheet';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTheme} from '../styles/theme';
 import {CalendarScreen} from '../screens/CalendarScreen';
 import {HistoryScreen} from '../screens/HistoryScreen';
+import {RecurringScreen} from '../screens/RecurringScreen';
 import {StatsScreen} from '../screens/StatsScreen';
 import {SettingsScreen} from '../screens/SettingsScreen';
-import {FAB} from '../components/common/FAB';
-import {TransactionForm} from '../components/transaction/TransactionForm';
-import {useTransactions} from '../hooks/useTransactions';
-import type {Transaction} from '../types';
 
 const Tab = createBottomTabNavigator();
 
-const TAB_BAR_HEIGHT = 49;
-const FAB_SIZE = 56;
+const TAB_BAR_HEIGHT = 52;
 
 export function RootNavigator(): React.JSX.Element {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const {add} = useTransactions();
-
-  const handleFABPress = useCallback(() => {
-    bottomSheetRef.current?.expand();
-  }, []);
-
-  const handleSave = useCallback(
-    (params: Omit<Transaction, 'id' | 'created_at'>) => {
-      add(params);
-      bottomSheetRef.current?.close();
-    },
-    [add],
-  );
-
-  const handleCancel = useCallback(() => {
-    bottomSheetRef.current?.close();
-  }, []);
-
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-        opacity={0.5}
-      />
-    ),
-    [],
-  );
 
   const tabBarHeight = TAB_BAR_HEIGHT + insets.bottom;
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, {paddingTop: insets.top}]}>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
+          sceneStyle: {backgroundColor: theme.paper},
+          animation: 'none',
           tabBarStyle: {
-            backgroundColor: theme.tabBar,
-            borderTopColor: theme.tabBarBorder,
-            borderTopWidth: 1,
+            backgroundColor: theme.card,
+            borderTopColor: theme.ink,
+            borderTopWidth: 2,
             height: tabBarHeight,
             paddingBottom: insets.bottom,
           },
-          tabBarActiveTintColor: theme.primary,
-          tabBarInactiveTintColor: theme.textSecondary,
-          tabBarLabelStyle: {fontSize: 11},
+          tabBarActiveTintColor: theme.card,
+          tabBarInactiveTintColor: theme.mute1,
+          tabBarLabelStyle: {
+            fontSize: 10,
+            fontWeight: '800',
+            letterSpacing: 1,
+            textTransform: 'uppercase',
+          },
+          tabBarItemStyle: {
+            borderRightWidth: 1,
+            borderRightColor: theme.rule,
+          },
+          tabBarActiveBackgroundColor: theme.ink,
         }}
       >
         <Tab.Screen
           name="Calendar"
           component={CalendarScreen}
           options={{
-            tabBarLabel: '달력',
+            tabBarLabel: '\uB2EC\uB825',
             tabBarIcon: ({color}) => (
-              <Text style={{fontSize: 20, color}}>📅</Text>
+              <Text style={[styles.tabIcon, {color}]}>{'\u25A0'}</Text>
             ),
           }}
         />
@@ -85,27 +62,29 @@ export function RootNavigator(): React.JSX.Element {
           name="History"
           component={HistoryScreen}
           options={{
-            tabBarLabel: '내역',
+            tabBarLabel: '\uB0B4\uC5ED',
             tabBarIcon: ({color}) => (
-              <Text style={{fontSize: 20, color}}>📋</Text>
+              <Text style={[styles.tabIcon, {color}]}>{'\u2261'}</Text>
             ),
           }}
         />
         <Tab.Screen
-          name="AddPlaceholder"
-          component={EmptyScreen}
+          name="Recurring"
+          component={RecurringScreen}
           options={{
-            tabBarLabel: '',
-            tabBarButton: () => <View style={{width: FAB_SIZE}} />,
+            tabBarLabel: '\uBC18\uBCF5',
+            tabBarIcon: ({color}) => (
+              <Text style={[styles.tabIcon, {color}]}>{'\u25C6'}</Text>
+            ),
           }}
         />
         <Tab.Screen
           name="Stats"
           component={StatsScreen}
           options={{
-            tabBarLabel: '통계',
+            tabBarLabel: '\uD1B5\uACC4',
             tabBarIcon: ({color}) => (
-              <Text style={{fontSize: 20, color}}>📊</Text>
+              <Text style={[styles.tabIcon, {color}]}>{'\u25B2'}</Text>
             ),
           }}
         />
@@ -113,55 +92,21 @@ export function RootNavigator(): React.JSX.Element {
           name="Settings"
           component={SettingsScreen}
           options={{
-            tabBarLabel: '설정',
+            tabBarLabel: '\uC124\uC815',
             tabBarIcon: ({color}) => (
-              <Text style={{fontSize: 20, color}}>⚙️</Text>
+              <Text style={[styles.tabIcon, {color}]}>{'\u25CE'}</Text>
             ),
           }}
         />
       </Tab.Navigator>
-
-      {/* FAB overlay centered above tab bar */}
-      <View
-        style={[
-          styles.fabContainer,
-          {bottom: tabBarHeight - FAB_SIZE / 2},
-        ]}
-        pointerEvents="box-none"
-      >
-        <FAB onPress={handleFABPress} />
-      </View>
-
-      {/* Transaction Form BottomSheet */}
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={-1}
-        snapPoints={['85%']}
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-        backgroundStyle={{backgroundColor: theme.surface}}
-        handleIndicatorStyle={{backgroundColor: theme.textSecondary}}
-      >
-        <BottomSheetView style={styles.sheetContent}>
-          <TransactionForm onSave={handleSave} onCancel={handleCancel} />
-        </BottomSheetView>
-      </BottomSheet>
     </View>
   );
 }
 
-function EmptyScreen(): React.JSX.Element {
-  return <View style={{flex: 1}} />;
-}
-
 const styles = StyleSheet.create({
   root: {flex: 1},
-  fabContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 100,
+  tabIcon: {
+    fontSize: 16,
+    fontWeight: '800',
   },
-  sheetContent: {flex: 1},
 });
