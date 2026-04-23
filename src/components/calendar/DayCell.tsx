@@ -1,6 +1,8 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useAtomValue } from "jotai";
 import { useTheme } from "../../styles/theme";
+import { hideIncomeAtom } from "../../store/atoms";
 import { formatShort } from "../../utils/format";
 import type { DaySummary } from "../../types";
 
@@ -24,6 +26,7 @@ export function DayCell({
   onPress
 }: DayCellProps): React.JSX.Element {
   const theme = useTheme();
+  const hideIncome = useAtomValue(hideIncomeAtom);
 
   // Non-current-month cells get muted background
   if (!isCurrentMonth) {
@@ -58,7 +61,7 @@ export function DayCell({
 
       {/* Bottom: amounts pushed down */}
       <View style={styles.bottomArea}>
-        {summary && summary.income > 0 && (
+        {summary && summary.income > 0 && !hideIncome && (
           <Text style={[styles.incomeText, { color: incomeColor }]} numberOfLines={1}>
             +{formatShort(summary.income)}
           </Text>

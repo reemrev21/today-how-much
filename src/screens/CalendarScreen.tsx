@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import BottomSheet, { BottomSheetView, BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 
 import { useTheme } from "../styles/theme";
-import { selectedMonthAtom, selectedDateAtom, dbVersionAtom } from "../store/atoms";
+import { selectedMonthAtom, selectedDateAtom, dbVersionAtom, hideIncomeAtom } from "../store/atoms";
 import { getCurrentLedgerId } from "../store/settings";
 import { getMonthDaySummaries, getMonthTotals } from "../db/transactionQueries";
 import { useTransactions } from "../hooks/useTransactions";
@@ -15,6 +15,7 @@ import { useTransactions } from "../hooks/useTransactions";
 import { MonthHeader } from "../components/calendar/MonthHeader";
 import { CalendarGrid } from "../components/calendar/CalendarGrid";
 import { LedgerSelector } from "../components/common/LedgerSelector";
+import { HideIncomeBadge } from "../components/common/HideIncomeBadge";
 import { TransactionList } from "../components/transaction/TransactionList";
 import { TransactionForm } from "../components/transaction/TransactionForm";
 
@@ -27,6 +28,7 @@ export function CalendarScreen(): React.JSX.Element {
   const [yearMonth, setYearMonth] = useAtom(selectedMonthAtom);
   const [selectedDate, setSelectedDate] = useAtom(selectedDateAtom);
   const dbVersion = useAtomValue(dbVersionAtom);
+  const hideIncome = useAtomValue(hideIncomeAtom);
   const { add, update, remove } = useTransactions();
 
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>();
@@ -167,7 +169,10 @@ export function CalendarScreen(): React.JSX.Element {
       {/* === BrutHeader === */}
       <View style={[styles.header, { borderBottomColor: theme.ink }]}>
         <Text style={[styles.appTitle, { color: theme.ink }]}>{"\uC624\uB298\uC5BC\uB9C8"}</Text>
-        <LedgerSelector />
+        <View style={styles.headerRight}>
+          <HideIncomeBadge />
+          <LedgerSelector />
+        </View>
       </View>
 
       {/* === BrutTodayHero — black block === */}
@@ -194,7 +199,9 @@ export function CalendarScreen(): React.JSX.Element {
             {"\uC6D4 \uD569\uACC4"}
           </Text>
           <View style={styles.heroMonthTotals}>
-            <Text style={[styles.heroMonthValue, { color: theme.mute2 }]}>+{formatAmount(thisMonthTotals.income)}</Text>
+            <Text style={[styles.heroMonthValue, { color: theme.mute2 }]}>
+              {hideIncome ? "+\u2022\u2022\u2022" : `+${formatAmount(thisMonthTotals.income)}`}
+            </Text>
             <Text style={[styles.heroMonthValue, { color: theme.card }]}>
               {"\u2212"}
               {formatAmount(thisMonthTotals.expense)}
@@ -210,6 +217,7 @@ export function CalendarScreen(): React.JSX.Element {
         onNext={handleNext}
         monthIncome={monthTotals.income}
         monthExpense={monthTotals.expense}
+        hideIncome={hideIncome}
       />
 
       {/* === Calendar grid === */}
@@ -290,6 +298,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 2
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12
   },
   appTitle: {
     fontSize: 22,

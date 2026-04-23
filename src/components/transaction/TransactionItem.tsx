@@ -1,7 +1,9 @@
 import React, { useCallback, useRef } from "react";
 import { View, Text, TouchableOpacity, Animated, StyleSheet, Alert } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
+import { useAtomValue } from "jotai";
 import { useTheme } from "../../styles/theme";
+import { hideIncomeAtom } from "../../store/atoms";
 import { formatAmount } from "../../utils/format";
 import type { Transaction } from "../../types";
 
@@ -13,10 +15,12 @@ interface TransactionItemProps {
 
 export function TransactionItem({ transaction, onPress, onDelete }: TransactionItemProps): React.JSX.Element {
   const theme = useTheme();
+  const hideIncome = useAtomValue(hideIncomeAtom);
   const swipeableRef = useRef<Swipeable>(null);
 
-  const amountPrefix = transaction.type === "income" ? "+" : "\u2212";
-  const amountColor = transaction.type === "income" ? theme.mute1 : theme.ink;
+  const isIncome = transaction.type === "income";
+  const amountPrefix = isIncome ? "+" : "\u2212";
+  const amountColor = isIncome ? theme.mute1 : theme.ink;
 
   const handleDelete = useCallback(() => {
     Alert.alert("거래 삭제", "이 거래를 삭제하시겠습니까?", [
@@ -62,8 +66,7 @@ export function TransactionItem({ transaction, onPress, onDelete }: TransactionI
           <Text style={[styles.method, { color: theme.mute2 }]}>{transaction.payment_method}</Text>
         </View>
         <Text style={[styles.amount, { color: amountColor }]}>
-          {amountPrefix}
-          {formatAmount(transaction.amount)}
+          {isIncome && hideIncome ? "+\u2022\u2022\u2022" : `${amountPrefix}${formatAmount(transaction.amount)}`}
         </Text>
       </TouchableOpacity>
     </Swipeable>

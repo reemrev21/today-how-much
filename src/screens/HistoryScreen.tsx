@@ -4,7 +4,8 @@ import { FlashList } from "@shopify/flash-list";
 import { useAtom, useAtomValue } from "jotai";
 
 import { useTheme } from "../styles/theme";
-import { historyFilterAtom, dbVersionAtom } from "../store/atoms";
+import { historyFilterAtom, dbVersionAtom, hideIncomeAtom } from "../store/atoms";
+import { HideIncomeBadge } from "../components/common/HideIncomeBadge";
 import { getCurrentLedgerId } from "../store/settings";
 import { getFilteredTransactions } from "../db/transactionQueries";
 import { useTransactions } from "../hooks/useTransactions";
@@ -19,6 +20,7 @@ export function HistoryScreen(): React.JSX.Element {
 
   const [filter, setFilter] = useAtom(historyFilterAtom);
   const dbVersion = useAtomValue(dbVersionAtom);
+  const hideIncome = useAtomValue(hideIncomeAtom);
   const { remove } = useTransactions();
 
   const [searchText, setSearchText] = useState(filter.search ?? "");
@@ -113,6 +115,7 @@ export function HistoryScreen(): React.JSX.Element {
       {/* Title */}
       <View style={[styles.titleRow, { borderBottomColor: theme.border }]}>
         <Text style={[styles.title, { color: theme.text }]}>내역</Text>
+        <HideIncomeBadge />
       </View>
 
       {/* Search bar */}
@@ -131,17 +134,19 @@ export function HistoryScreen(): React.JSX.Element {
 
       {/* Filter chips */}
       <View style={[styles.filterRow, { borderBottomColor: theme.border }]}>
-        <TouchableOpacity
-          style={[
-            styles.chip,
-            { borderColor: theme.border, backgroundColor: theme.card },
-            isIncomeActive && { backgroundColor: theme.income, borderColor: theme.income }
-          ]}
-          onPress={() => handleTypeFilter(isIncomeActive ? undefined : "income")}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.chipText, { color: isIncomeActive ? "#fff" : theme.textSecondary }]}>수입</Text>
-        </TouchableOpacity>
+        {!hideIncome && (
+          <TouchableOpacity
+            style={[
+              styles.chip,
+              { borderColor: theme.border, backgroundColor: theme.card },
+              isIncomeActive && { backgroundColor: theme.income, borderColor: theme.income }
+            ]}
+            onPress={() => handleTypeFilter(isIncomeActive ? undefined : "income")}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.chipText, { color: isIncomeActive ? theme.card : theme.textSecondary }]}>수입</Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           style={[
@@ -152,7 +157,7 @@ export function HistoryScreen(): React.JSX.Element {
           onPress={() => handleTypeFilter(isExpenseActive ? undefined : "expense")}
           activeOpacity={0.7}
         >
-          <Text style={[styles.chipText, { color: isExpenseActive ? "#fff" : theme.textSecondary }]}>지출</Text>
+          <Text style={[styles.chipText, { color: isExpenseActive ? theme.card : theme.textSecondary }]}>지출</Text>
         </TouchableOpacity>
       </View>
 
@@ -179,6 +184,9 @@ export function HistoryScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth

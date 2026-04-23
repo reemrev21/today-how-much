@@ -8,6 +8,7 @@ import { selectedMonthAtom, statsPeriodAtom, dbVersionAtom } from "../store/atom
 import { getCurrentLedgerId } from "../store/settings";
 import { getCategorySummary, getPaymentMethodSummary, getMonthlyTrend } from "../db/transactionQueries";
 
+import { HideIncomeBadge } from "../components/common/HideIncomeBadge";
 import { CategoryPieChart } from "../components/chart/CategoryPieChart";
 import { MonthlyTrendChart } from "../components/chart/MonthlyTrendChart";
 import { PaymentMethodChart } from "../components/chart/PaymentMethodChart";
@@ -54,6 +55,7 @@ export function StatsScreen(): React.JSX.Element {
       {/* Title */}
       <View style={[styles.titleRow, { borderBottomColor: theme.border }]}>
         <Text style={[styles.title, { color: theme.text }]}>통계</Text>
+        <HideIncomeBadge />
       </View>
 
       {/* Period toggle */}
@@ -67,7 +69,7 @@ export function StatsScreen(): React.JSX.Element {
           onPress={() => setPeriod("monthly")}
           activeOpacity={0.7}
         >
-          <Text style={[styles.toggleText, { color: period === "monthly" ? "#fff" : theme.textSecondary }]}>월별</Text>
+          <Text style={[styles.toggleText, { color: period === "monthly" ? theme.fabText : theme.textSecondary }]}>월별</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -78,7 +80,7 @@ export function StatsScreen(): React.JSX.Element {
           onPress={() => setPeriod("yearly")}
           activeOpacity={0.7}
         >
-          <Text style={[styles.toggleText, { color: period === "yearly" ? "#fff" : theme.textSecondary }]}>연별</Text>
+          <Text style={[styles.toggleText, { color: period === "yearly" ? theme.fabText : theme.textSecondary }]}>연별</Text>
         </TouchableOpacity>
       </View>
 
@@ -111,6 +113,9 @@ export function StatsScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth

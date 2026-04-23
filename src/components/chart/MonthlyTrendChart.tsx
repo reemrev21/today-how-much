@@ -1,7 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
+import { useAtomValue } from "jotai";
 import { useTheme } from "../../styles/theme";
+import { hideIncomeAtom } from "../../store/atoms";
 import type { MonthlyTrend } from "../../types";
 
 interface MonthlyTrendChartProps {
@@ -10,6 +12,7 @@ interface MonthlyTrendChartProps {
 
 export function MonthlyTrendChart({ data }: MonthlyTrendChartProps): React.JSX.Element {
   const theme = useTheme();
+  const hideIncome = useAtomValue(hideIncomeAtom);
 
   if (data.length === 0) {
     return (
@@ -19,24 +22,33 @@ export function MonthlyTrendChart({ data }: MonthlyTrendChartProps): React.JSX.E
     );
   }
 
-  // Build paired bar data: [income_bar, expense_bar] per month
+  // Build bar data: paired [income, expense] per month, or expense-only when hiding income
   const barData: { value: number; label?: string; frontColor: string; spacing?: number }[] = [];
   data.forEach((item, index) => {
     const monthLabel = item.month.slice(5); // "MM"
-    barData.push({
-      value: item.income,
-      label: index === 0 ? monthLabel : monthLabel,
-      frontColor: theme.income,
-      spacing: 2
-    });
-    barData.push({
-      value: item.expense,
-      frontColor: theme.expense,
-      spacing: 16
-    });
+    if (hideIncome) {
+      barData.push({
+        value: item.expense,
+        label: monthLabel,
+        frontColor: theme.expense,
+        spacing: 16
+      });
+    } else {
+      barData.push({
+        value: item.income,
+        label: index === 0 ? monthLabel : monthLabel,
+        frontColor: theme.income,
+        spacing: 2
+      });
+      barData.push({
+        value: item.expense,
+        frontColor: theme.expense,
+        spacing: 16
+      });
+    }
   });
 
-  const maxValue = Math.max(...data.flatMap(d => [d.income, d.expense]), 1);
+  const maxValue = Math.max(...data.flatMap(d => [hideIncome ? 0 : d.income, d.expense]), 1);
 
   return (
     <View style={styles.container}>
@@ -57,10 +69,12 @@ export function MonthlyTrendChart({ data }: MonthlyTrendChartProps): React.JSX.E
       />
       {/* Legend */}
       <View style={styles.legendRow}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendBox, { backgroundColor: theme.income }]} />
-          <Text style={[styles.legendText, { color: theme.textSecondary }]}>수입</Text>
-        </View>
+        {!hideIncome && (
+          <View style={styles.legendItem}>
+            <View style={[styles.legendBox, { backgroundColor: theme.income }]} />
+            <Text style={[styles.legendText, { color: theme.textSecondary }]}>수입</Text>
+          </View>
+        )}
         <View style={styles.legendItem}>
           <View style={[styles.legendBox, { backgroundColor: theme.expense }]} />
           <Text style={[styles.legendText, { color: theme.textSecondary }]}>지출</Text>

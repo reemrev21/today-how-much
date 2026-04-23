@@ -1,12 +1,12 @@
 import React, { useState, useCallback, useRef } from "react";
 import { View, Text, Pressable, FlatList, Alert, StyleSheet, Animated, Keyboard } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import BottomSheet, { BottomSheetTextInput, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
 import { useTheme, Theme } from "../styles/theme";
 import { formatAmount, formatAmountInput } from "../utils/format";
-import { dbVersionAtom } from "../store/atoms";
+import { dbVersionAtom, hideIncomeAtom } from "../store/atoms";
 import { getCurrentLedgerId, getCategories, getPaymentMethods } from "../store/settings";
 import {
   getRecurringRules,
@@ -15,6 +15,7 @@ import {
   deleteRecurringRule,
   reorderRecurringRules
 } from "../db/recurringQueries";
+import { HideIncomeBadge } from "../components/common/HideIncomeBadge";
 import type { RecurringRule, TransactionType } from "../types";
 
 const INCOME_CATEGORIES = ["월급", "부수입", "용돈", "기타수입"];
@@ -47,7 +48,8 @@ function RuleItem({
   onMoveUp,
   onMoveDown,
   isFirst,
-  isLast
+  isLast,
+  hideIncome
 }: {
   item: RecurringRule;
   theme: Theme;
@@ -58,13 +60,14 @@ function RuleItem({
   onMoveDown: (id: string) => void;
   isFirst: boolean;
   isLast: boolean;
+  hideIncome: boolean;
 }): React.JSX.Element {
   const swipeRef = useRef<Swipeable>(null);
   const isIncome = item.type === "income";
   const active = item.is_active;
 
   const handleDelete = useCallback(() => {
-    Alert.alert("삭제", "이 고정거래를 삭제하시겠습니까?", [
+    Alert.alert("삭제", "이 반복거래를 삭제하시겠습니까?", [
       { text: "취소", style: "cancel", onPress: () => swipeRef.current?.close() },
       { text: "삭제", style: "destructive", onPress: () => onDelete(item.id) }
     ]);
@@ -110,15 +113,14 @@ function RuleItem({
             <Text style={[styles.itemPayment, { color: theme.mute2 }]}>{item.payment_method}</Text>
           </View>
           <Text style={[styles.itemAmount, { color: isIncome ? theme.mute1 : theme.ink }]}>
-            {isIncome ? "+" : "\u2212"}
-            {formatAmount(item.amount)}
+            {isIncome && hideIncome ? "+\u2022\u2022\u2022" : `${isIncome ? "+" : "\u2212"}${formatAmount(item.amount)}`}
           </Text>
           <Pressable
             style={[styles.toggleBtn, { backgroundColor: active ? theme.ink : theme.mute2 }]}
             onPress={() => onToggle(item)}
             hitSlop={8}
           >
-            <View style={[styles.toggleKnob, active ? styles.toggleKnobOn : styles.toggleKnobOff]} />
+            <View style={[styles.toggleKnob, { backgroundColor: theme.card }, active ? styles.toggleKnobOn : styles.toggleKnobOff]} />
           </Pressable>
         </View>
       </Pressable>
@@ -129,6 +131,7 @@ function RuleItem({
 export function RecurringScreen(): React.JSX.Element {
   const theme = useTheme();
   const [dbVersion, setDbVersion] = useAtom(dbVersionAtom);
+  const hideIncome = useAtomValue(hideIncomeAtom);
   const sheetRef = useRef<BottomSheet>(null);
 
   const ledgerId = getCurrentLedgerId() ?? "";
@@ -285,10 +288,13 @@ export function RecurringScreen(): React.JSX.Element {
     <View style={[styles.container, { backgroundColor: theme.paper }]}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.ink }]}>
-        <Text style={[styles.headerTitle, { color: theme.ink }]}>고정거래</Text>
-        <Pressable style={[styles.headerAddBtn, { backgroundColor: theme.ink }]} onPress={handleAdd}>
-          <Text style={[styles.headerAddText, { color: theme.card }]}>+ 추가</Text>
-        </Pressable>
+        <Text style={[styles.headerTitle, { color: theme.ink }]}>반복</Text>
+        <View style={styles.headerRight}>
+          <HideIncomeBadge />
+          <Pressable style={[styles.headerAddBtn, { backgroundColor: theme.ink }]} onPress={handleAdd}>
+            <Text style={[styles.headerAddText, { color: theme.card }]}>+ 추가</Text>
+          </Pressable>
+        </View>
       </View>
 
       {/* Total bar */}
@@ -298,7 +304,9 @@ export function RecurringScreen(): React.JSX.Element {
         </View>
         <View style={styles.totalRight}>
           {incomeTotal > 0 && (
-            <Text style={[styles.totalIncome, { color: theme.mute2 }]}>+{formatAmount(incomeTotal)}</Text>
+            <Text style={[styles.totalIncome, { color: theme.mute2 }]}>
+              {hideIncome ? "+\u2022\u2022\u2022" : `+${formatAmount(incomeTotal)}`}
+            </Text>
           )}
           <Text style={[styles.totalAmount, { color: theme.card }]}>
             {"\u2212"}
@@ -327,6 +335,7 @@ export function RecurringScreen(): React.JSX.Element {
               onMoveDown={id => handleMove(id, "down")}
               isFirst={index === 0}
               isLast={index === rules.length - 1}
+              hideIncome={hideIncome}
             />
           )}
           style={styles.list}
@@ -457,6 +466,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2
   },
   headerTitle: { fontSize: 22, fontWeight: "900", letterSpacing: -0.88 },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: 10 },
   headerAddBtn: { paddingHorizontal: 12, paddingVertical: 6 },
   headerAddText: { fontSize: 13, fontWeight: "800" },
 
@@ -504,7 +514,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
     marginLeft: 12
   },
-  toggleKnob: { width: 14, height: 14, borderRadius: 7, backgroundColor: "#fff" },
+  toggleKnob: { width: 14, height: 14, borderRadius: 7 },
   toggleKnobOn: { alignSelf: "flex-end" },
   toggleKnobOff: { alignSelf: "flex-start" },
 
