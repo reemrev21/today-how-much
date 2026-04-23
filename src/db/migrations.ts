@@ -1,4 +1,4 @@
-import {getDB} from './connection';
+import { getDB } from "./connection";
 
 export function runMigrations(): void {
   const db = getDB();
@@ -49,7 +49,7 @@ export function runMigrations(): void {
 
   // Migration: add sort_order to existing recurring_rules
   try {
-    db.executeSync('ALTER TABLE recurring_rules ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0');
+    db.executeSync("ALTER TABLE recurring_rules ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0");
   } catch {
     // column already exists
   }

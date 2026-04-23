@@ -1,5 +1,5 @@
-export type TransactionType = 'income' | 'expense';
-export type ThemeMode = 'system' | 'light' | 'dark';
+export type TransactionType = "income" | "expense";
+export type ThemeMode = "system" | "light" | "dark";
 
 export interface Ledger {
   id: string;

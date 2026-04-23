@@ -1,17 +1,19 @@
-import type {TransactionType} from '../types';
+import type { TransactionType } from "../types";
 
 export function formatAmount(amount: number): string {
-  return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 export function formatAmountInput(text: string): string {
-  const digits = text.replace(/[^0-9]/g, '');
-  if (!digits) {return '';}
-  return Number(digits).toLocaleString('ko-KR');
+  const digits = text.replace(/[^0-9]/g, "");
+  if (!digits) {
+    return "";
+  }
+  return Number(digits).toLocaleString("ko-KR");
 }
 
 export function formatAmountSigned(amount: number, type: TransactionType): string {
-  const prefix = type === 'income' ? '+' : '\u2212';
+  const prefix = type === "income" ? "+" : "\u2212";
   return `${prefix}${formatAmount(amount)}`;
 }
 

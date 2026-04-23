@@ -1,13 +1,9 @@
-import {useAtom} from 'jotai';
-import {useCallback} from 'react';
-import {dbVersionAtom} from '../store/atoms';
-import {
-  createTransaction,
-  updateTransaction,
-  deleteTransaction,
-} from '../db/transactionQueries';
-import {getCurrentLedgerId} from '../store/settings';
-import type {Transaction, TransactionType} from '../types';
+import { useAtom } from "jotai";
+import { useCallback } from "react";
+import { dbVersionAtom } from "../store/atoms";
+import { createTransaction, updateTransaction, deleteTransaction } from "../db/transactionQueries";
+import { getCurrentLedgerId } from "../store/settings";
+import type { Transaction, TransactionType } from "../types";
 
 interface AddParams {
   ledger_id: string;
@@ -32,7 +28,7 @@ export function useTransactions() {
       bump();
       return tx;
     },
-    [bump],
+    [bump]
   );
 
   const update = useCallback(
@@ -45,12 +41,12 @@ export function useTransactions() {
         payment_method: string;
         memo: string | null;
         date: string;
-      },
+      }
     ): void => {
       updateTransaction(id, params);
       bump();
     },
-    [bump],
+    [bump]
   );
 
   const remove = useCallback(
@@ -58,12 +54,12 @@ export function useTransactions() {
       deleteTransaction(id);
       bump();
     },
-    [bump],
+    [bump]
   );
 
   const getLedgerId = useCallback((): string => {
-    return getCurrentLedgerId() ?? '';
+    return getCurrentLedgerId() ?? "";
   }, []);
 
-  return {add, update, remove, getLedgerId};
+  return { add, update, remove, getLedgerId };
 }

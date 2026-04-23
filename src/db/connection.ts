@@ -1,10 +1,10 @@
-import {open, type DB} from '@op-engineering/op-sqlite';
+import { open, type DB } from "@op-engineering/op-sqlite";
 
 let db: DB | null = null;
 
 export function getDB(): DB {
   if (!db) {
-    db = open({name: 'accountbook.db'});
+    db = open({ name: "accountbook.db" });
   }
   return db;
 }
