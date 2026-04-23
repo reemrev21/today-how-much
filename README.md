@@ -1,97 +1,125 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 오늘얼마 (TodayHowMuch)
 
-# Getting Started
+상단에 오늘 얼마를 썼는지 한눈에 확인하기 위해 만든 개인용 가계부 앱입니다.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+기존 가계부 앱(예: 오픈뱅킹)은 모든 거래 내역을 상세하게 보여주는 방식이라
+빠르게 소비 금액만 확인하고 싶은 사용 방식에는 다소 불편했습니다.
+불필요한 정보는 숨기거나 정리하는 것도 번거로워,
+필요한 기능만 담아 직접 만들었습니다.
 
-## Step 1: Start Metro
+- 오늘 소비 금액에 집중한 심플한 구조
+- 빠른 입력과 직관적인 확인
+- Brutalist UI 기반 디자인
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 기술 스택
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- React Native (CLI)
+- TypeScript
+- op-sqlite (로컬 DB)
+- react-native-mmkv (설정 저장)
+- jotai (상태 관리)
+- @gorhom/bottom-sheet
+- react-native-gifted-charts (차트)
+- react-native-gesture-handler (스와이프)
 
-```sh
-# Using npm
-npm start
+## 주요 기능
 
-# OR using Yarn
-yarn start
+### 달력 (Calendar)
+- 월별 캘린더 뷰, 일자별 수입/지출 요약 표시
+- 좌우 스와이프로 월 이동
+- 오늘 날짜 하이라이트 + NOW 배지
+- 히어로 영역: 오늘 지출, 이번 달 합계 실시간 표시
+- 날짜 터치 → 바텀시트로 해당일 거래 목록 조회
+- 거래 추가/수정/삭제 (바텀시트 폼)
+
+### 내역 (History)
+- 전체 거래 내역 무한 스크롤 (FlashList)
+- 메모/카테고리 검색
+- 수입/지출 필터 칩
+- 스와이프로 거래 삭제
+
+### 반복거래 (Recurring)
+- 고정 수입/지출 등록 (매월 N일)
+- 활성/비활성 토글
+- 드래그로 순서 변경 (▲/▼)
+- 스와이프로 삭제
+- 월 고정 합계 표시
+
+### 통계 (Stats)
+- 월별/연별 전환
+- 카테고리별 지출 파이차트
+- 월별 수입/지출 추이 막대차트
+- 결제수단별 비율 바차트
+
+### 설정 (Settings)
+- 다중 장부 관리 (생성/삭제/전환)
+- 테마 전환 (라이트/다크/시스템)
+- 카테고리 관리 (추가/삭제)
+- 결제수단 관리 (추가/삭제)
+- CSV 내보내기/가져오기 (거래, 반복거래, 카테고리, 결제수단 포함)
+- 가져오기 템플릿 다운로드
+
+### 수입 가리기
+- 헤더의 `[수입]` 배지 터치로 on/off
+- 모든 화면에서 수입 금액 마스킹 (`+•••`)
+- 캘린더 셀, 히어로, 월 합계, 거래 목록, 반복거래, 통계 차트 전체 적용
+- 설정 영속 저장 (앱 재시작 후에도 유지)
+
+### 다크모드
+- 시스템 설정 연동 또는 수동 전환
+- 전체 화면 실시간 반영 (jotai atom 기반)
+- Brutalist 모노크롬 테마 토큰
+
+## CSV 포맷
+
+```
+날짜,유형,금액,카테고리,결제수단,메모
+2025-01-15,지출,12000,식비,카드,점심식사
+
+[반복거래]
+유형,금액,카테고리,결제수단,메모,반복일,활성
+지출,50000,통신비,계좌이체,휴대폰요금,25,Y
+
+[설정]
+항목,값
+카테고리,식비|교통비|주거비|통신비
+결제수단,현금|카드|계좌이체
 ```
 
-## Step 2: Build and run your app
+## 프로젝트 구조
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+```
+src/
+├── components/
+│   ├── calendar/       # MonthHeader, CalendarGrid, DayCell
+│   ├── chart/          # CategoryPieChart, MonthlyTrendChart, PaymentMethodChart
+│   ├── common/         # LedgerSelector, HideIncomeBadge, FAB
+│   ├── settings/       # CategoryManager, PaymentMethodManager
+│   └── transaction/    # TransactionItem, TransactionForm, TransactionList
+├── db/                 # SQLite 쿼리 (ledger, transaction, recurring)
+├── hooks/              # useTransactions
+├── navigation/         # RootNavigator (탭 네비게이션)
+├── screens/            # Calendar, History, Recurring, Stats, Settings
+├── store/              # jotai atoms, MMKV settings
+├── styles/             # 테마 토큰 (light/dark)
+├── types/              # TypeScript 타입 정의
+└── utils/              # CSV, 날짜, 포맷 유틸
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+## 실행
 
 ```sh
-bundle install
-```
+# 의존성 설치
+npm install
 
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+# iOS
+cd ios && bundle exec pod install && cd ..
 npm run ios
 
-# OR using Yarn
-yarn ios
+# Android
+npm run android
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## Built with
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+[Claude Code](https://claude.ai/claude-code)의 도움을 받아 개발했습니다.
