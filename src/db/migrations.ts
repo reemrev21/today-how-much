@@ -50,7 +50,7 @@ export function runMigrations(): void {
   // Migration: add sort_order to existing recurring_rules
   try {
     db.executeSync('ALTER TABLE recurring_rules ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0');
-  } catch (_) {
+  } catch {
     // column already exists
   }
 }

@@ -144,7 +144,7 @@ export function SettingsScreen(): React.JSX.Element {
         type: 'text/csv',
         filename: fileName,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (!Share.isCancel?.(err)) {
         Alert.alert('오류', 'CSV 내보내기에 실패했습니다.');
       }
@@ -212,7 +212,7 @@ export function SettingsScreen(): React.JSX.Element {
           },
         ],
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (!DocumentPicker.isCancel(err)) {
         Alert.alert('오류', 'CSV 가져오기에 실패했습니다.');
       }
@@ -231,7 +231,7 @@ export function SettingsScreen(): React.JSX.Element {
         type: 'text/csv',
         filename: fileName,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (!Share.isCancel?.(err)) {
         Alert.alert('오류', '템플릿 내보내기에 실패했습니다.');
       }

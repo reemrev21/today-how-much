@@ -140,7 +140,7 @@ export function RecurringScreen(): React.JSX.Element {
     setPayment(getPaymentMethods()[0] ?? '');
     setMemo('');
     setDay('1');
-  }, []);
+  }, [setMemo]);
 
   const handleAdd = useCallback(() => {
     resetForm();
@@ -156,7 +156,7 @@ export function RecurringScreen(): React.JSX.Element {
     setMemo(rule.memo ?? '');
     setDay(String(rule.day_of_month));
     sheetRef.current?.expand();
-  }, []);
+  }, [setMemo]);
 
   const handleFormTypeChange = useCallback((t: TransactionType) => {
     setFormType(t);
@@ -411,8 +411,8 @@ const styles = StyleSheet.create({
   },
   totalLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 1.8 },
   totalRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  totalIncome: { fontSize: 15, fontWeight: '800', letterSpacing: -0.3, fontVariant: ['tabular-nums'] as any },
-  totalAmount: { fontSize: 20, fontWeight: '900', letterSpacing: -1, fontVariant: ['tabular-nums'] as any },
+  totalIncome: { fontSize: 15, fontWeight: '800', letterSpacing: -0.3, fontVariant: ['tabular-nums' as const] },
+  totalAmount: { fontSize: 20, fontWeight: '900', letterSpacing: -1, fontVariant: ['tabular-nums' as const] },
 
   list: { flex: 1 },
   listContent: { paddingBottom: 8 },
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   dayText: { fontSize: 10, fontWeight: '700' },
   itemMemo: { fontSize: 13, marginBottom: 2 },
   itemPayment: { fontSize: 11, fontWeight: '600', letterSpacing: 0.5 },
-  itemAmount: { fontSize: 16, fontWeight: '800', fontVariant: ['tabular-nums'] as any },
+  itemAmount: { fontSize: 16, fontWeight: '800', fontVariant: ['tabular-nums' as const] },
 
   toggleBtn: { width: 34, height: 20, borderRadius: 10, justifyContent: 'center', paddingHorizontal: 3, marginLeft: 12 },
   toggleKnob: { width: 14, height: 14, borderRadius: 7, backgroundColor: '#fff' },
@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
   typeBtn: { flex: 1, paddingVertical: 10, alignItems: 'center' },
   typeBtnText: { fontSize: 15, fontWeight: '700' },
   formLabel: { fontSize: 13, fontWeight: '600', marginBottom: 8, marginTop: 16 },
-  formInput: { fontSize: 16, fontWeight: '700', borderWidth: 1, paddingHorizontal: 14, paddingVertical: 10, fontVariant: ['tabular-nums'] as any },
+  formInput: { fontSize: 16, fontWeight: '700', borderWidth: 1, paddingHorizontal: 14, paddingVertical: 10, fontVariant: ['tabular-nums' as const] },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1 },
   chipText: { fontSize: 13, fontWeight: '600' },

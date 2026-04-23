@@ -1,5 +1,6 @@
 import React, {useCallback, useRef, useState} from 'react';
-import {View, Text, Pressable, StyleSheet, Keyboard} from 'react-native';
+import {View, Text, StyleSheet, Keyboard} from 'react-native';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
 import {useAtom, useAtomValue} from 'jotai';
 import dayjs from 'dayjs';
@@ -146,7 +147,7 @@ export function CalendarScreen(): React.JSX.Element {
   );
 
   const renderBackdrop = useCallback(
-    (props: any) => (
+    (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
       <BottomSheetBackdrop
         {...props}
         disappearsOnIndex={-1}
@@ -237,12 +238,13 @@ export function CalendarScreen(): React.JSX.Element {
                 <Text style={[styles.dateLabel, {color: theme.ink}]}>
                   {dayjs(selectedDate).format('MM.DD')} {['\uC77C', '\uC6D4', '\uD654', '\uC218', '\uBAA9', '\uAE08', '\uD1A0'][dayjs(selectedDate).day()]}
                 </Text>
-                <Pressable
+                <TouchableOpacity
                   style={[styles.addBtn, {backgroundColor: theme.ink}]}
                   onPress={handleAddForDate}
+                  activeOpacity={0.7}
                 >
                   <Text style={[styles.addBtnText, {color: theme.card}]}>+ 추가</Text>
-                </Pressable>
+                </TouchableOpacity>
               </View>
               <TransactionList
                 ledgerId={ledgerId}

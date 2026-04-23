@@ -1,4 +1,4 @@
-import React, {useMemo, useRef} from 'react';
+import React, {useEffect, useMemo, useRef} from 'react';
 import {View, Text, StyleSheet, PanResponder} from 'react-native';
 import dayjs from 'dayjs';
 import {useTheme} from '../../styles/theme';
@@ -30,8 +30,11 @@ export function CalendarGrid({
   const theme = useTheme();
   const today = dayjs().format('YYYY-MM-DD');
 
+  /* eslint-disable react-hooks/refs -- PanResponder must be created once; ref keeps callbacks stable */
   const callbacksRef = useRef({onPrev, onNext});
-  callbacksRef.current = {onPrev, onNext};
+  useEffect(() => {
+    callbacksRef.current = {onPrev, onNext};
+  });
 
   const panResponder = useRef(
     PanResponder.create({
@@ -46,6 +49,7 @@ export function CalendarGrid({
       },
     }),
   ).current;
+  /* eslint-enable react-hooks/refs */
 
   const days = useMemo(() => getCalendarDays(yearMonth), [yearMonth]);
 
@@ -66,6 +70,7 @@ export function CalendarGrid({
   }, [days]);
 
   return (
+    // eslint-disable-next-line react-hooks/refs
     <View style={styles.container} {...panResponder.panHandlers}>
       {/* Weekday header — black background */}
       <View style={[styles.weekdayBar, {backgroundColor: theme.ink}]}>

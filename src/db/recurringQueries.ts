@@ -9,10 +9,11 @@ export function createRecurringRule(params: {
 }): RecurringRule {
   const db = getDB();
   const id = uuid.v4() as string;
-  const maxOrder = (db.executeSync(
+  const row = db.executeSync(
     'SELECT COALESCE(MAX(sort_order), -1) as max_order FROM recurring_rules WHERE ledger_id = ?',
     [params.ledger_id],
-  ).rows?.[0] as any)?.max_order ?? -1;
+  ).rows?.[0] as {max_order: number} | undefined;
+  const maxOrder = row?.max_order ?? -1;
   const sort_order = maxOrder + 1;
   db.executeSync(
     `INSERT INTO recurring_rules (id, ledger_id, type, amount, category, payment_method, memo, day_of_month, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,

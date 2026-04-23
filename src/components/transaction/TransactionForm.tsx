@@ -77,6 +77,7 @@ export function TransactionForm({
   const prevEditIdRef = useRef<string | undefined>(editTransaction?.id);
   const prevInitialDateRef = useRef<string | undefined>(initialDate);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- syncing form state from parent prop */
   useEffect(() => {
     const prevId = prevEditIdRef.current;
     const prevDate = prevInitialDateRef.current;
@@ -85,7 +86,6 @@ export function TransactionForm({
     prevEditIdRef.current = currId;
     prevInitialDateRef.current = initialDate;
 
-    // Same edit transaction — skip
     if (currId && currId === prevId) {return;}
 
     if (editTransaction) {
@@ -96,7 +96,6 @@ export function TransactionForm({
       setPaymentMethod(editTransaction.payment_method);
       setMemo(editTransaction.memo ?? '');
     } else if (prevId !== undefined || prevDate !== initialDate) {
-      // Only reset when transitioning from edit→add or initialDate actually changed
       const methods = getPaymentMethods();
       setType('expense');
       setAmountText('');
@@ -107,6 +106,7 @@ export function TransactionForm({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editTransaction?.id, initialDate]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const categories = filterCategories(allCategories, type);
 

@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
-  Switch,
 } from 'react-native';
 import {useTheme} from '../../styles/theme';
 import {getCurrentLedgerId, getCategories, getPaymentMethods} from '../../store/settings';
