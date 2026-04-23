@@ -6,8 +6,16 @@ import Share from "react-native-share";
 import DocumentPicker from "react-native-document-picker";
 
 import { useTheme } from "../styles/theme";
-import { dbVersionAtom } from "../store/atoms";
-import { getCurrentLedgerId, setCurrentLedgerId, getThemeMode, setThemeMode } from "../store/settings";
+import { dbVersionAtom, themeModeAtom } from "../store/atoms";
+import {
+  getCurrentLedgerId,
+  setCurrentLedgerId,
+  setThemeMode,
+  getCategories,
+  getPaymentMethods,
+  setCategories,
+  setPaymentMethods
+} from "../store/settings";
 import { getAllLedgers, createLedger, deleteLedger } from "../db/ledgerQueries";
 import { getTransactionsForExport, createTransaction } from "../db/transactionQueries";
 import { getRecurringRules, createRecurringRule } from "../db/recurringQueries";
@@ -20,8 +28,7 @@ import type { ThemeMode, Ledger } from "../types";
 export function SettingsScreen(): React.JSX.Element {
   const theme = useTheme();
   const [, setDbVersion] = useAtom(dbVersionAtom);
-
-  const [themeMode, setThemeModeState] = useState<ThemeMode>(() => getThemeMode());
+  const [themeMode, setThemeModeAtom] = useAtom(themeModeAtom);
   const [ledgers, setLedgers] = useState<Ledger[]>(() => getAllLedgers());
   const [currentLedgerId, setCurrentLedgerIdState] = useState<string | undefined>(() => getCurrentLedgerId());
 
@@ -93,10 +100,13 @@ export function SettingsScreen(): React.JSX.Element {
   );
 
   // --- Theme ---
-  const handleTheme = useCallback((mode: ThemeMode) => {
-    setThemeMode(mode);
-    setThemeModeState(mode);
-  }, []);
+  const handleTheme = useCallback(
+    (mode: ThemeMode) => {
+      setThemeMode(mode);
+      setThemeModeAtom(mode);
+    },
+    [setThemeModeAtom]
+  );
 
   // --- CSV Export ---
   const handleExport = useCallback(async () => {
@@ -108,7 +118,9 @@ export function SettingsScreen(): React.JSX.Element {
     try {
       const transactions = getTransactionsForExport(ledgerId);
       const rules = getRecurringRules(ledgerId);
-      const csv = buildExportCsv(transactions, rules);
+      const categories = getCategories();
+      const paymentMethods = getPaymentMethods();
+      const csv = buildExportCsv(transactions, rules, categories, paymentMethods);
       const fileName = `transactions_${new Date().toISOString().slice(0, 10)}.csv`;
       const filePath = `${RNFS.TemporaryDirectoryPath}/${fileName}`;
       await RNFS.writeFile(filePath, csv, "utf8");
@@ -141,8 +153,8 @@ export function SettingsScreen(): React.JSX.Element {
         Platform.OS === "android" ? filePath : decodeURIComponent(filePath.replace("file://", "")),
         "utf8"
       );
-      const { transactions: rows, recurringRules: rrRows } = parseCsv(content);
-      if (rows.length === 0 && rrRows.length === 0) {
+      const { transactions: rows, recurringRules: rrRows, settings } = parseCsv(content);
+      if (rows.length === 0 && rrRows.length === 0 && !settings) {
         Alert.alert("오류", "가져올 데이터가 없습니다.");
         return;
       }
@@ -152,6 +164,9 @@ export function SettingsScreen(): React.JSX.Element {
       }
       if (rrRows.length > 0) {
         parts.push(`반복거래 ${rrRows.length}건`);
+      }
+      if (settings) {
+        parts.push("카테고리/결제수단 설정");
       }
       Alert.alert("CSV 가져오기", `${parts.join(", ")}을 가져오시겠습니까?`, [
         { text: "취소", style: "cancel" },
@@ -179,6 +194,14 @@ export function SettingsScreen(): React.JSX.Element {
                 memo: rr.memo,
                 day_of_month: rr.day_of_month
               });
+            }
+            if (settings) {
+              if (settings.categories.length > 0) {
+                setCategories(settings.categories);
+              }
+              if (settings.paymentMethods.length > 0) {
+                setPaymentMethods(settings.paymentMethods);
+              }
             }
             bump();
             Alert.alert("완료", `${parts.join(", ")}을 가져왔습니다.`);
@@ -271,7 +294,7 @@ export function SettingsScreen(): React.JSX.Element {
                 onPress={() => handleTheme(opt.value)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.themeBtnText, { color: themeMode === opt.value ? "#fff" : theme.text }]}>
+                <Text style={[styles.themeBtnText, { color: themeMode === opt.value ? theme.card : theme.text }]}>
                   {opt.label}
                 </Text>
               </TouchableOpacity>
@@ -299,7 +322,7 @@ export function SettingsScreen(): React.JSX.Element {
             onPress={handleExport}
             activeOpacity={0.7}
           >
-            <Text style={styles.dataBtnText}>CSV 내보내기</Text>
+            <Text style={[styles.dataBtnText, { color: theme.fabText }]}>CSV 내보내기</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.dataBtn, { backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.primary }]}
@@ -371,5 +394,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10
   },
-  dataBtnText: { color: "#fff", fontSize: 14, fontWeight: "600" }
+  dataBtnText: { fontSize: 14, fontWeight: "600" }
 });

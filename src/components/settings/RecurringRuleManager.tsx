@@ -137,7 +137,7 @@ export function RecurringRuleManager(): React.JSX.Element {
               onPress={() => setFormType("income")}
               activeOpacity={0.7}
             >
-              <Text style={{ color: formType === "income" ? "#fff" : theme.textSecondary, fontSize: 13 }}>수입</Text>
+              <Text style={{ color: formType === "income" ? theme.card : theme.textSecondary, fontSize: 13 }}>수입</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
@@ -148,7 +148,7 @@ export function RecurringRuleManager(): React.JSX.Element {
               onPress={() => setFormType("expense")}
               activeOpacity={0.7}
             >
-              <Text style={{ color: formType === "expense" ? "#fff" : theme.textSecondary, fontSize: 13 }}>지출</Text>
+              <Text style={{ color: formType === "expense" ? theme.card : theme.textSecondary, fontSize: 13 }}>지출</Text>
             </TouchableOpacity>
           </View>
 
@@ -195,7 +195,7 @@ export function RecurringRuleManager(): React.JSX.Element {
             onPress={handleAdd}
             activeOpacity={0.7}
           >
-            <Text style={styles.addBtnText}>추가</Text>
+            <Text style={[styles.addBtnText, { color: theme.fabText }]}>추가</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -253,5 +253,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 4
   },
-  addBtnText: { color: "#fff", fontSize: 14, fontWeight: "600" }
+  addBtnText: { fontSize: 14, fontWeight: "600" }
 });

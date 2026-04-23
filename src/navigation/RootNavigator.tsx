@@ -20,7 +20,7 @@ export function RootNavigator(): React.JSX.Element {
   const tabBarHeight = TAB_BAR_HEIGHT + insets.bottom;
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <View style={[styles.root, { paddingTop: insets.top, backgroundColor: theme.paper }]}>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,

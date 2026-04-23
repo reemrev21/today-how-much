@@ -75,7 +75,7 @@ export function CalendarGrid({
       <View style={[styles.weekdayBar, { backgroundColor: theme.ink }]}>
         {WEEKDAYS.map((wd, idx) => (
           <View key={wd} style={styles.weekdayCell}>
-            <Text style={[styles.weekdayText, { color: idx === 0 || idx === 6 ? "#FFFFFF" : theme.mute2 }]}>{wd}</Text>
+            <Text style={[styles.weekdayText, { color: idx === 0 || idx === 6 ? theme.card : theme.mute2 }]}>{wd}</Text>
           </View>
         ))}
       </View>

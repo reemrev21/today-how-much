@@ -1,6 +1,7 @@
 import { useColorScheme } from "react-native";
 import { useMemo } from "react";
-import { getThemeMode } from "../store/settings";
+import { useAtomValue } from "jotai";
+import { themeModeAtom } from "../store/atoms";
 
 // Brutalist monochrome tokens
 const light = {
@@ -61,7 +62,7 @@ export type Theme = typeof light;
 
 export function useTheme(): Theme {
   const systemScheme = useColorScheme();
-  const themeMode = getThemeMode();
+  const themeMode = useAtomValue(themeModeAtom);
   return useMemo(() => {
     if (themeMode === "light") return light;
     if (themeMode === "dark") return dark;

@@ -9,6 +9,7 @@ interface MonthHeaderProps {
   onNext: () => void;
   monthIncome?: number;
   monthExpense?: number;
+  hideIncome?: boolean;
 }
 
 export function MonthHeader({
@@ -16,13 +17,14 @@ export function MonthHeader({
   onPrev,
   onNext,
   monthIncome = 0,
-  monthExpense = 0
+  monthExpense = 0,
+  hideIncome = false
 }: MonthHeaderProps): React.JSX.Element {
   const theme = useTheme();
   const label = yearMonth.replace("-", ".");
 
   return (
-    <View style={[styles.container, { borderTopColor: theme.ink, borderBottomColor: theme.ink }]}>
+    <View style={[styles.container, { backgroundColor: theme.card, borderTopColor: theme.ink, borderBottomColor: theme.ink }]}>
       {/* Top row: nav */}
       <View style={[styles.navRow, { borderBottomColor: theme.ink }]}>
         <TouchableOpacity onPress={onPrev} style={styles.navBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -38,7 +40,9 @@ export function MonthHeader({
       <View style={styles.totalsRow}>
         <View style={styles.totalCol}>
           <Text style={[styles.totalLabel, { color: theme.mute1 }]}>수입</Text>
-          <Text style={[styles.totalValue, { color: theme.mute1 }]}>+{formatAmount(monthIncome)}</Text>
+          <Text style={[styles.totalValue, { color: theme.mute1 }]}>
+            {hideIncome ? "+\u2022\u2022\u2022" : `+${formatAmount(monthIncome)}`}
+          </Text>
         </View>
         <View style={[styles.totalDivider, { backgroundColor: theme.ink }]} />
         <View style={styles.totalCol}>
@@ -55,7 +59,7 @@ export function MonthHeader({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    /* backgroundColor set dynamically via theme.card */
     borderTopWidth: 2,
     borderBottomWidth: 2
   },

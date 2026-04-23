@@ -73,7 +73,7 @@ export function CategoryManager(): React.JSX.Element {
           onPress={handleAdd}
           activeOpacity={0.7}
         >
-          <Text style={[styles.addBtnText, { color: "#fff" }]}>추가</Text>
+          <Text style={[styles.addBtnText, { color: theme.fabText }]}>추가</Text>
         </TouchableOpacity>
       </View>
     </View>

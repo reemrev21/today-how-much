@@ -174,7 +174,9 @@ export function TransactionForm({
           style={[styles.toggleBtn, type === "expense" && { backgroundColor: theme.primary }]}
           onPress={() => handleTypeChange("expense")}
         >
-          <Text style={[styles.toggleText, type === "expense" ? styles.toggleActive : { color: theme.textSecondary }]}>
+          <Text
+            style={[styles.toggleText, { color: type === "expense" ? theme.fabText : theme.textSecondary }]}
+          >
             지출
           </Text>
         </Pressable>
@@ -182,7 +184,7 @@ export function TransactionForm({
           style={[styles.toggleBtn, type === "income" && { backgroundColor: theme.primary }]}
           onPress={() => handleTypeChange("income")}
         >
-          <Text style={[styles.toggleText, type === "income" ? styles.toggleActive : { color: theme.textSecondary }]}>
+          <Text style={[styles.toggleText, { color: type === "income" ? theme.fabText : theme.textSecondary }]}>
             수입
           </Text>
         </Pressable>
@@ -234,7 +236,7 @@ export function TransactionForm({
                 ]}
                 onPress={() => setCategory(c)}
               >
-                <Text style={[styles.chipText, { color: selected ? "#fff" : theme.text }]}>{c}</Text>
+                <Text style={[styles.chipText, { color: selected ? theme.card : theme.text }]}>{c}</Text>
               </Pressable>
             );
           })}
@@ -257,7 +259,7 @@ export function TransactionForm({
                 ]}
                 onPress={() => setPaymentMethod(m)}
               >
-                <Text style={[styles.chipText, { color: selected ? "#fff" : theme.text }]}>{m}</Text>
+                <Text style={[styles.chipText, { color: selected ? theme.fabText : theme.text }]}>{m}</Text>
               </Pressable>
             );
           })}
@@ -288,7 +290,7 @@ export function TransactionForm({
           <Text style={[styles.cancelText, { color: theme.textSecondary }]}>취소</Text>
         </Pressable>
         <Pressable style={[styles.saveBtn, { backgroundColor: amountColor }]} onPress={handleSave}>
-          <Text style={styles.saveText}>{editTransaction ? "수정" : "저장"}</Text>
+          <Text style={[styles.saveText, { color: theme.card }]}>{editTransaction ? "수정" : "저장"}</Text>
         </Pressable>
       </View>
 
@@ -320,7 +322,6 @@ const styles = StyleSheet.create({
     borderRadius: 0
   },
   toggleText: { fontSize: 15, fontWeight: "600" },
-  toggleActive: { color: "#fff" },
   section: { marginBottom: 20 },
   label: { fontSize: 13, fontWeight: "500", marginBottom: 8 },
   amountInput: {
@@ -378,7 +379,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 10
   },
-  saveText: { fontSize: 16, fontWeight: "700", color: "#fff" },
+  saveText: { fontSize: 16, fontWeight: "700" },
   deleteBtn: {
     marginTop: 16,
     paddingVertical: 14,

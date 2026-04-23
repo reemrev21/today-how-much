@@ -8,7 +8,8 @@ const KEYS = {
   THEME_MODE: "theme_mode",
   CATEGORIES: "categories",
   PAYMENT_METHODS: "payment_methods",
-  LAST_RECURRING_CHECK: "last_recurring_check"
+  LAST_RECURRING_CHECK: "last_recurring_check",
+  HIDE_INCOME: "hide_income"
 } as const;
 
 const DEFAULT_CATEGORIES = [
@@ -63,6 +64,12 @@ export function getPaymentMethods(): string[] {
 }
 export function setPaymentMethods(methods: string[]): void {
   storage.set(KEYS.PAYMENT_METHODS, JSON.stringify(methods));
+}
+export function getHideIncome(): boolean {
+  return storage.getBoolean(KEYS.HIDE_INCOME) ?? false;
+}
+export function setHideIncome(hide: boolean): void {
+  storage.set(KEYS.HIDE_INCOME, hide);
 }
 export function getLastRecurringCheck(): string | undefined {
   return storage.getString(KEYS.LAST_RECURRING_CHECK);
