@@ -122,4 +122,5 @@ npm run android
 
 ## Built with
 
-[Claude Code](https://claude.ai/claude-code)의 도움을 받아 개발했습니다.
+- 디자인: [rawblock](https://designmd.ai/chef/rawblock)에서 영감을 받은 Brutalist 모노크롬 UI
+- 개발: [Claude Code](https://claude.ai/claude-code)의 도움을 받아 개발했습니다.

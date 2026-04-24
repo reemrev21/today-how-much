@@ -1,51 +1,46 @@
 ---
-name: 가계부 (Household Ledger)
-description: "React Native 기반 개인·가정용 가계부. 달력·거래·통계·설정 흐름을 탭으로 묶고, 수입·지출 의미 색과 인디고·바이올렛 액센트로 읽기 쉬운 데이터 위주 UI."
+name: 오늘얼마 (TodayHowMuch)
+description: "React Native 기반 개인용 가계부. Brutalist 모노크롬 디자인으로, 흑백 대비와 굵은 타이포그래피에 집중한 데이터 위주 UI."
 
 colors:
   light:
-    background: "#FFFFFF"
-    surface: "#F5F5F5"
+    ink: "#0A0A0A"
+    paper: "#FAFAFA"
     card: "#FFFFFF"
-    text: "#1A1A1A"
-    text-secondary: "#888888"
-    border: "#E0E0E0"
-    primary: "#5C6BC0"
-    primary-light: "#E8EAF6"
-    income: "#2E7D32"
-    expense: "#D32F2F"
-    tab-bar: "#FFFFFF"
-    tab-bar-border: "#E0E0E0"
-    fab: "#5C6BC0"
-    on-fab: "#FFFFFF"
-    on-primary-text: "#FFFFFF"
-    chart-pie:
-      - "#5C6BC0"
-      - "#E91E63"
-      - "#FF9800"
-      - "#4CAF50"
-      - "#00BCD4"
-      - "#9C27B0"
-      - "#F44336"
-      - "#FFEB3B"
-      - "#8BC34A"
-      - "#3F51B5"
+    mute1: "#737373"
+    mute2: "#A3A3A3"
+    mute3: "#525252"
+    rule: "#E5E5E5"
+    hair: "#262626"
+    income: "#737373"
+    expense: "#0A0A0A"
+    primary: "#0A0A0A"
+    primaryLight: "#E5E5E5"
+    tabBar: "#FFFFFF"
+    tabBarBorder: "#0A0A0A"
+    fab: "#0A0A0A"
+    fabText: "#FFFFFF"
   dark:
-    background: "#1A1A2E"
-    surface: "#252545"
-    card: "#2A2A4A"
-    text: "#E0E0E0"
-    text-secondary: "#888888"
-    border: "#3A3A5A"
-    primary: "#7C6EF0"
-    primary-light: "#3A3A6A"
-    income: "#51CF66"
-    expense: "#FF6B6B"
-    tab-bar: "#1E1E3A"
-    tab-bar-border: "#2A2A4A"
-    fab: "#7C6EF0"
-    on-fab: "#FFFFFF"
-    on-primary-text: "#FFFFFF"
+    ink: "#F5F5F5"
+    paper: "#0A0A0A"
+    card: "#1A1A1A"
+    mute1: "#A3A3A3"
+    mute2: "#737373"
+    mute3: "#D4D4D4"
+    rule: "#333333"
+    hair: "#D4D4D4"
+    income: "#A3A3A3"
+    expense: "#F5F5F5"
+    primary: "#F5F5F5"
+    primaryLight: "#333333"
+    tabBar: "#1A1A1A"
+    tabBarBorder: "#F5F5F5"
+    fab: "#F5F5F5"
+    fabText: "#0A0A0A"
+  semantic:
+    delete-action: "#D32F2F"
+    delete-text: "#FFFFFF"
+    modal-scrim: "rgba(0, 0, 0, 0.4)"
     chart-pie:
       - "#5C6BC0"
       - "#E91E63"
@@ -57,83 +52,107 @@ colors:
       - "#FFEB3B"
       - "#8BC34A"
       - "#3F51B5"
-  semantic:
-    on-selected-chip: "#FFFFFF"
-    sheet-backdrop: "rgba(0, 0, 0, 0.5)"
-    modal-scrim: "rgba(0, 0, 0, 0.4)"
 
 typography:
-  family: "System (platform default; e.g. SF Pro on iOS, Roboto on Android)"
-  screen-title-lg:
-    fontSize: 22px
-    fontWeight: "700"
-    lineHeight: 28px
-  screen-title-md:
-    fontSize: 18px
-    fontWeight: "700"
-    lineHeight: 24px
-  section-heading:
-    fontSize: 16px
-    fontWeight: "700"
-    lineHeight: 22px
+  family: "System (platform default; SF Pro on iOS, Roboto on Android)"
+  month-label:
+    fontSize: 34px
+    fontWeight: "900"
+    letterSpacing: -1.7
+    fontVariant: tabular-nums
   form-title:
     fontSize: 20px
     fontWeight: "700"
-    lineHeight: 26px
+  total-value:
+    fontSize: 17px
+    fontWeight: "800"
+    letterSpacing: -0.34
+    fontVariant: tabular-nums
+  total-label:
+    fontSize: 10px
+    fontWeight: "700"
+    letterSpacing: 1.8
+    textTransform: uppercase
   body:
     fontSize: 15px
     fontWeight: "500"
-    lineHeight: 22px
   body-emphasis:
-    fontSize: 16px
+    fontSize: 15px
     fontWeight: "700"
-    lineHeight: 22px
-  input:
-    fontSize: 16px
-    fontWeight: "400"
-    lineHeight: 24px
-  amount-hero:
+  amount-large:
     fontSize: 28px
     fontWeight: "700"
-    lineHeight: 34px
+  amount-row:
+    fontSize: 16px
+    fontWeight: "800"
+    fontVariant: tabular-nums
   label:
     fontSize: 13px
     fontWeight: "500"
-    lineHeight: 18px
   chip:
     fontSize: 13px
     fontWeight: "500"
-    lineHeight: 18px
-  tab-label:
-    fontSize: 11px
+  input:
+    fontSize: 16px
     fontWeight: "400"
-    lineHeight: 14px
-  calendar-weekday:
-    fontSize: 12px
-    fontWeight: "600"
-    lineHeight: 16px
+  tab-label:
+    fontSize: 10px
+    fontWeight: "800"
+    letterSpacing: 1
+    textTransform: uppercase
+  tab-icon:
+    fontSize: 16px
+    fontWeight: "800"
   calendar-day:
-    fontSize: 13px
-    fontWeight: "600"
-    lineHeight: 18px
-  calendar-amount:
+    fontSize: 12px
+    fontWeight: "800"
+    letterSpacing: -0.24
+    fontVariant: tabular-nums
+  calendar-income:
     fontSize: 9px
-    fontWeight: "500"
-    lineHeight: 12px
+    fontWeight: "600"
+    fontVariant: tabular-nums
+  calendar-expense:
+    fontSize: 11px
+    fontWeight: "800"
+    fontVariant: tabular-nums
+  now-badge:
+    fontSize: 7px
+    fontWeight: "800"
+    letterSpacing: 1.05
+  nav-arrow:
+    fontSize: 14px
+    fontWeight: "600"
+  ledger-badge:
+    fontSize: 11px
+    fontWeight: "700"
+    letterSpacing: 1.1
+  hide-income-badge:
+    fontSize: 10px
+    fontWeight: "800"
+    letterSpacing: 1
   chart-axis:
     fontSize: 10px
-    fontWeight: "400"
-    lineHeight: 14px
-  chevron:
-    fontSize: 10px
-    fontWeight: "400"
-  tab-emoji:
-    fontSize: 20px
-    lineHeight: 24px
+  chart-center-amount:
+    fontSize: 15px
+    fontWeight: "700"
+  chart-center-unit:
+    fontSize: 11px
+  legend:
+    fontSize: 13px
   fab-plus:
     fontSize: 28px
-    fontWeight: "400"
+    fontWeight: "300"
     lineHeight: 32px
+  method-label:
+    fontSize: 13px
+    fontWeight: "500"
+  memo:
+    fontSize: 13px
+  payment-method:
+    fontSize: 11px
+    fontWeight: "600"
+    letterSpacing: 0.5
 
 spacing:
   unit: 8px
@@ -145,38 +164,31 @@ spacing:
   xxl: 20px
   section: 32px
   screen-horizontal: 16px
-  content-bottom: 32px
-  fab-margin-from-tab: 28px
-  list-row-vertical: 12px
+  form-horizontal: 20px
+  form-bottom: 32px
   chip-gap: 8px
+  section-gap: 20px
+  button-gap: 12px
 
 radii:
-  xs: 6px
-  sm: 8px
+  none: 0
+  sm: 5px
   md: 10px
   lg: 12px
-  xl: 16px
-  full: 9999px
-  fab: 28px
+  chip: 16px
+  fab: 0
 
 elevation:
-  android-fab: 6
-  ios-fab:
-    shadowColor: "#000000"
-    shadowOffset: "0 4"
-    shadowOpacity: 0.3
-    shadowRadius: 4
-  border-hairline: 0.5
-  border-default: 1
-
-shadows:
-  fab-ios: "0px 4px 4px rgba(0, 0, 0, 0.3)"
+  border-hairline: "StyleSheet.hairlineWidth"
+  border-default: 1px
+  border-bold: 2px
+  border-badge: 1.5px
 
 layout:
-  tab-bar-height: 49px
+  tab-bar-height: 52px
   bottom-sheet-snap: "85%"
-  search-field-height: 40px
-  day-cell-min-height: 64px
+  fab-size: 56px
+  day-cell-min-height: 70px
   pie-chart-outer-radius: 90px
   pie-chart-inner-radius: 55px
   bar-chart-bar-width: 18px
@@ -185,127 +197,197 @@ layout:
   payment-bar-height: 10px
   payment-label-width: 60px
   payment-amount-width: 80px
-  list-estimated-row-height: 72px
-  end-reached-threshold: 0.3
+  legend-dot-size: 10px
+  delete-swipe-width: 72px
+  ledger-modal-max-height: 300px
 
 motion:
-  touch-press-primary: 0.8
-  touch-press-secondary: 0.7
-  bottom-sheet-backdrop-opacity: 0.5
+  touch-opacity-primary: 0.8
+  touch-opacity-secondary: 0.7
   bar-chart-animated: true
   modal-animation: fade
-  list-pagination-size: 50
+  swipe-friction: 2
 
 components:
-  app-header:
-    background-light: "{colors.light.background}"
-    background-dark: "{colors.dark.background}"
-    title-typography: "{typography.screen-title-md}"
-    border-color-light: "{colors.light.border}"
-    border-color-dark: "{colors.dark.border}"
-  ledger-pill:
-    background-light: "{colors.light.primary-light}"
-    background-dark: "{colors.dark.primary-light}"
-    border-width-px: 1
-    border-color-light: "{colors.light.primary}"
-    border-color-dark: "{colors.dark.primary}"
-    radius: "{radii.xl}"
-    label-typography: "{typography.body}"
-  bottom-sheet:
-    surface-light: "{colors.light.surface}"
-    surface-dark: "{colors.dark.surface}"
-    handle-light: "{colors.light.text-secondary}"
-    handle-dark: "{colors.dark.text-secondary}"
-  primary-fab:
+  tab-bar:
+    height: "{layout.tab-bar-height} + safeAreaBottom"
+    background: "{colors.card}"
+    border-top-width: 2px
+    border-top-color: "{colors.ink}"
+    item-divider: "1px {colors.rule}"
+    active-bg: "{colors.ink}"
+    active-text: "{colors.card}"
+    inactive-text: "{colors.mute1}"
+    icons: "▪ ≡ ◆ ▲ ◎ (Unicode, not emoji)"
+  fab:
     size: 56px
-    background-light: "{colors.light.fab}"
-    background-dark: "{colors.dark.fab}"
-    icon-light: "{colors.light.on-fab}"
-    icon-dark: "{colors.dark.on-fab}"
-    shadow-ios: "{shadows.fab-ios}"
-    elevation-android: 6
-  segmented-type-toggle:
-    track-radius: "{radii.md}"
-    active-expense-light: "{colors.light.expense}"
-    active-expense-dark: "{colors.dark.expense}"
-    active-income-light: "{colors.light.income}"
-    active-income-dark: "{colors.dark.income}"
-  input-field:
-    radius: "{radii.md}"
-    border-width-px: 1
-    border-light: "{colors.light.border}"
-    border-dark: "{colors.dark.border}"
-  filter-chip:
-    radius: "{radii.xl}"
-  stats-period-toggle:
-    active-light: "{colors.light.primary}"
-    active-dark: "{colors.dark.primary}"
-  data-card:
+    shape: square
+    border-radius: 0
+    border-width: 2px
+    background: "{colors.ink}"
+    icon: "+"
+    icon-color: "{colors.card}"
+    icon-weight: "300"
+  ledger-badge:
+    shape: square
+    border-radius: 0
+    border-width: 1.5px
+    border-color: "{colors.ink}"
+    text-transform: uppercase
+  hide-income-badge:
+    shape: square
+    border-width: 1.5px
+    active-bg: "{colors.mute2}"
+    active-text: "{colors.card}"
+    active-text-decoration: line-through
+    inactive-border: "{colors.ink}"
+    inactive-text: "{colors.ink}"
+  month-header:
+    border-top: "2px {colors.ink}"
+    border-bottom: "2px {colors.ink}"
+    nav-row-border-bottom: "1px {colors.ink}"
+    totals-divider: "1px vertical {colors.ink}"
+  day-cell:
+    min-height: 70px
+    padding: "4px 4px 3px"
+    non-current-month-bg: "{colors.rule}"
+    non-current-month-text-opacity: 0.4
+    today-and-selected: "inverted (ink bg, card text)"
+    now-badge: "inverted rectangle, no radius"
+    inset-border: "2px {colors.card} (today+selected)"
+  transaction-item:
+    padding: "12px 16px"
+    border-bottom: "1px {colors.rule}"
+    category-size: 15px bold
+    memo-color: "{colors.mute1}"
+    method-color: "{colors.mute2}"
+    income-amount-color: "{colors.mute1}"
+    expense-amount-color: "{colors.ink}"
+    delete-action-bg: "#D32F2F"
+    delete-action-width: 72px
+  transaction-form:
+    surface: "{colors.surface}"
+    content-padding: "0 20px 32px"
+    toggle-radius: 10px
+    toggle-active-bg: "{colors.primary}"
+    toggle-active-text: "{colors.fabText}"
+    input-radius: 10px
+    input-border: "1px {colors.border}"
+    chip-radius: 16px
+    chip-selected-bg: "{colors.primary}"
+    chip-selected-text: "{colors.card}"
+    save-btn-radius: 10px
+    save-btn-bg: "{colors.primary}"
+    cancel-btn-radius: 10px
+    cancel-btn-border: "1px {colors.border}"
+    delete-text-color: "#D32F2F"
+  ledger-modal:
+    overlay: "rgba(0,0,0,0.4)"
+    sheet-bg: "{colors.ink}"
+    sheet-title-color: "{colors.card}"
+    item-bg: "{colors.card}"
+    item-text: "{colors.ink}"
+    selected-item-bg: "{colors.ink}"
+    selected-item-text: "{colors.card}"
+  stats-card:
     radius: "{radii.lg}"
     padding: "{spacing.xl}"
+    background: "{colors.card}"
+    border: "hairline {colors.border}"
+  pie-chart:
+    palette: "{colors.semantic.chart-pie}"
+    center-amount: "{typography.chart-center-amount}"
+    legend-dot: "10x10px rounded"
+  bar-chart:
+    income-bar: "{colors.income}"
+    expense-bar: "{colors.expense}"
+    axis-color: "{colors.border}"
+  payment-bar:
+    track: "{colors.border}"
+    fill: "{colors.primary}"
+    height: 10px
+    radius: 5px
 ---
 
 ## 브랜드·톤
 
-이 앱은 “숫자가 한눈에”를 최우선으로 한다. 꾸밈보다 **읽기·탐색·수정**에 에너지를 쓰는 실용적 가계부다. 톤은 **차분하고 사무적**이며, 감정을 자극하는 그래데이션이나 과한 장식은 쓰지 않는다.  
-시각적 정체성은 **낮은 채도의 보라·인디고 계열 액센트**와 **수입(녹) / 지출(적) 고정 의미**의 대비로 잡힌다. 라이트는 흰·연회 배경에 짙은 글자, 다크는 남은 별빛 느낌의 **딥 네이비 베이스**에 밝은 회조 글자로, 장시간 봐도 눈이 덜 피로한 조합을 지향한다.
+이 앱은 **Brutalist 모노크롬**을 기조로 한다. 색상 없이 **흑과 백, 그리고 회색의 농도**로 정보의 위계를 만든다. 톤은 **무장식·사무적·직관적**이며, 장식적 그래데이션이나 유채색 액센트는 쓰지 않는다.
+
+시각적 정체성은 **거친 직각·굵은 경계선·무채색 대비**로 잡힌다. 라이트 모드는 밝은 배경(`#FAFAFA`)에 짙은 잉크(`#0A0A0A`), 다크 모드는 순수 검정 배경에 밝은 잉크로, 모드 전환 시 ink↔paper가 반전되는 구조다.
 
 ## 색 (Colors)
 
-- **캔버스**: 본문 배경(`background`)이 가장 밝고(또는 다크에선 가장 어둡고), 섹션·시트·검색줄은 `surface`·`card`로 한 단계 띄워 층을 구분한다. `border`는 1px 또는 hairline로만 쓰여 구분은 있지만 무겁지 않다.  
-- **액센트**: `primary`는 인디고(라이트)·전기보라(다크)로, 버튼·탭 선택·필·선택 행·진행률 막대 등 **한 가지 “브랜드” 축**을 만든다. `primary-light`는 필·리스트 하이라이트에만 쓰여 채도를 올리지 않는다.  
-- **수입·지출**: 금액·토글·달력 액센트에만 녹/적을 쓰고, **주말 머리글**에 일=적, 토=primary 같은 약한 시각 힌트를 줄 수 있으나 텍스트 본문의 기본 글자색은 바꾸지 않는다.  
-- **차트**: 막대·도넛 센터는 테마에 맞추고, **도넛 조각**은 10색 고정 팔레트로 범주를 구분해 한 화면에 여러 카테고리가 있어도 식별 가능하게 한다.  
-- **오버레이**: 시트·모달 뒤는 **반투명 검정(시트 50%·리스트 팝업 40%)**으로 포커스를 앞에 둔다.  
-- **고정 흰색**: 선택된 칩·강한 CTA에만 `#FFFFFF`를 써, 배경·경계가 바뀌어도 대비가 흔들리지 않게 한다.
+- **모노크롬**: 전체 UI가 `ink`(전경)와 `paper`(배경) 두 극으로 구성된다. `card`는 paper보다 한 톤 밝아(또는 어두워) 면 분리를 만들고, `rule`은 hairline 경계에만 쓰인다.
+- **회색 위계**: `mute1`(수입 금액, 보조 텍스트), `mute2`(3차 텍스트, 비활성), `mute3`(날짜 숫자 등) 세 단계의 회색으로 정보 중요도를 구분한다.
+- **수입·지출 구분**: 유채색 없이 **농도**로 구분한다. 지출은 `ink`(가장 진함)으로 강조, 수입은 `mute1`(회색)으로 억제. 부호(`+`/`−`)가 의미를 보완한다.
+- **차트만 유채색**: 파이차트 조각에만 10색 고정 팔레트를 써서 카테고리를 식별한다. 막대차트는 모노크롬(`income`/`expense` 톤)을 그대로 쓴다.
+- **삭제만 적색**: 스와이프 삭제 액션(`#D32F2F`)과 삭제 버튼 텍스트에만 유일하게 빨간색을 쓴다. 파괴적 행위의 경고 목적.
+- **오버레이**: 모달 뒤는 반투명 검정 40%(`rgba(0,0,0,0.4)`)로 포커스를 앞에 둔다.
 
 ## 타이포그래피 (Typography)
 
-- **패밀리**: 임의 웹폰트가 아닌 **플랫폼 기본 UI 서체**를 써, 입력·리스트·차트가 네이티브와 맞닿는 느낌을 낸다.  
-- **위계**: 화면명(22/18), 폼 제목(20), 카드/섹션 제목(16)으로 큰 틀을 잡고, **금액 히어로(28, 굵게)**가 폼의 시각적 중심이 된다.  
-- **데이터 밀도**: 달력 셀 안의 수입·지출액은 **9px**로 촘촘히 넣어, 한 칸이 “작은 대시보드”처럼 보이게 한다.  
-- **탭**: 하단 탭 글자는 **11px**로 작고 보조적이어서, 콘텐츠 영역이 주인공이 된다.
+- **패밀리**: 플랫폼 기본 UI 서체(SF Pro / Roboto). 커스텀 폰트 없음.
+- **무게로 위계**: 극단적 굵기 차이가 brutalist 느낌을 만든다. 월 라벨 `900`, 탭·배지·NOW `800`, 금액 `700~800`, 본문 `500~600`, FAB의 + 기호만 `300`으로 가볍게.
+- **데이터 밀도**: 달력 셀 안의 수입은 **9px**, 지출은 **11px**로 촘촘히 넣어 한 칸이 미니 대시보드처럼 보인다. `tabular-nums`로 숫자 정렬.
+- **대문자**: 탭 라벨, 장부 배지, NOW 배지, 모달 제목에 `uppercase` + 넓은 `letterSpacing`으로 기계적 느낌.
+- **월 라벨**: `34px / 900 / letterSpacing -1.7`로 화면의 시각적 앵커 역할.
 
 ## 레이아웃·간격 (Layout & Spacing)
 
-- **격자**: **8px**를 기본 단위로 쓰고, 4·6·12·16·20·32px가 반복된다. 수평 패딩 16, 카드/폼 20, 하단 여백 32 정도의 리듬이 일관된다.  
-- **수직 구획**: 머리막대·검색·필터·콘텐츠가 **가는 구분선(hairline)**으로 쌓이는 스택형 레이아웃이다.  
-- **빈 상태**: 짧은 한 줄 설명(14px)과 넉넉한 세로 패딩으로 “없다”는 것을 감정 없이 전달한다.
+- **격자**: **8px** 기본 단위. 4·6·8·12·16·20·32px가 반복된다. 수평 패딩 16px, 폼 내부 20px, 하단 여백 32px.
+- **수직 구획**: 굵은 2px 경계선(MonthHeader 상하, TabBar 상단)이 큰 구획을, 1px 또는 hairline이 리스트 행을 구분한다.
+- **탭바 구분**: 각 탭 사이에 1px 세로 구분선(`rule`), 선택 탭은 ink 배경으로 반전.
 
 ## 모양 (Radii & Shape)
 
-- **입력·강한 사각**: **10px** 둥근 모서리로 통일해 폼·토글·검색창이 한 세트로 읽힌다.  
-- **필·칩·필터**: **16px**로 필과 칩을 “캡슐/알약” 느낌으로.  
-- **카드·모달**: **12px**로 약한 카드 느낌.  
-- **달력 날짜·오늘 링**: 작은 6~12px 반지름; 오늘은 **얇은 primary 링**만.  
-- **플로팅 버튼**: **56×56**, 완전한 원(28px radius), 탭바 위에 떠 있는 **접시형 액션**으로 인지되게 한다.
+- **직각 우선**: FAB, 장부 배지, 수입 가리기 배지, NOW 배지, 장부 선택 모달이 모두 **borderRadius: 0**. Brutalist의 핵심 조형 언어.
+- **입력·버튼**: **10px** 둥근 모서리. 토글, 텍스트 입력, 저장/취소 버튼이 한 세트로 읽힌다.
+- **칩**: **16px**로 캡슐/알약 형태. 카테고리·결제수단 선택.
+- **카드**: **12px**로 약한 카드 느낌. 통계 섹션.
+- **바 차트 트랙**: **5px** borderRadius로 둥근 프로그레스 바.
 
 ## 깊이·그림자 (Elevation)
 
-- **대부분의 화면**: 그림자 없이 **면 분리(배경 vs 카드) + 1px 경계**만.  
-- **FAB만**: iOS는 검정 30% 부드러운 그림자, Android는 `elevation: 6`로 **“떠 있는” 단 하나**의 떠블 표시다.  
-- **하단 시트**: 배경 딤 + 시트 `surface`로, 스크롤 콘텐츠는 시트 안에서만 끝난다.
+- **그림자 없음**: 전체 앱에서 box-shadow / elevation을 쓰지 않는다. FAB 포함.
+- **면 분리 + 경계선만**: 배경(`paper`) vs 카드(`card`) 색 차이와 1~2px 경계선으로 깊이를 표현한다.
+- **경계선 위계**: 2px(MonthHeader·TabBar, 구조적 분할) > 1.5px(배지 테두리) > 1px(리스트 행, 입력 필드) > hairline(카드 외곽).
+
+## 반전 패턴 (Inversion)
+
+Brutalist 디자인의 핵심 인터랙션 패턴. 선택/활성 상태를 **ink↔card 색 반전**으로 표현한다:
+
+- **탭바**: 선택 탭 = ink 배경 + card 텍스트
+- **달력 셀**: 오늘/선택 = ink 배경 + card 텍스트·금액
+- **칩**: 선택 = primary(=ink) 배경 + card 텍스트
+- **토글**: 활성 = primary 배경 + fabText
+- **장부 모달**: 선택 항목 = ink 배경 + card 텍스트
+- **NOW 배지**: 반전 배경 위 반전 텍스트
 
 ## 모션 (Motion)
 
-- **터치**: 0.7~0.8 `activeOpacity`로 가벼운 눌림.  
-- **시트/모달**: 당김으로 닫기, 반투명 배경.  
-- **차트**: 막대 **애니메이션** 켜서 값 변화를 부드럽게.  
-- **리스트**: 끝 스크롤 30% 지점에서 다음 페이지·추가 로딩(내부 chunk 단위)을 전제로 한 **연속 스크롤** 패턴.
+- **터치**: `activeOpacity` 0.7~0.8로 가벼운 눌림. 진동·스케일 애니메이션 없음.
+- **모달**: `animationType="fade"` + 반투명 배경으로 등장.
+- **차트**: 막대차트 `isAnimated: true`로 값 변화 부드럽게.
+- **스와이프**: `react-native-gesture-handler` Swipeable로 삭제. `friction: 2`, `overshootRight: false`.
 
 ## 컴포넌트·패턴 (Component Patterns)
 
-- **하단 탐색**: 5탭(달력, 내역, 가운데 FAB 자리, 통계, 설정); 가운데는 “빈” 자리이고, **둥근 primary FAB**이 탭 위 중앙에 겹쳐 **추가**의 유일한 주입력으로 보이게 한다.  
-- **달력 셀**: 선택 시 `primary` 배경 + 흰 글자·흰 금액으로, 비선택은 녹/적 액센트만.  
-- **거래 입력**: 수입/지출 세그먼트가 **반쪽씩** 채워지는 토글이 먼저, 금액·날짜·칩(카테고리·결제수단) 순. 저장은 **수입·지출에 대응하는 색으로 채운** 넓은 버튼, 취소는 외곽선만.  
-- **거래 한 줄**: 카테고리 굵게, 메모·결제수단은 2·3단계 `text-secondary`, 금액은 수입/지출색 + 접두 + 원.  
-- **통계**: 월/연 토글이 `primary`로, 카드 3장(도넛, 월별 막대, 결제수단 막대)이 같은 12px 카드·16px 내부 여백으로 맞춘다.  
-- **설정**: 흰/연 카드 안에 장부·테마·가져오기, 강한 액션은 `primary` solid, 약한 대안은 outline primary.
+- **하단 탐색**: 5탭(달력·내역·반복·통계·설정). Unicode 기호(▪ ≡ ◆ ▲ ◎)를 아이콘으로 사용. 이모지 아닌 기하학적 심볼. 선택 탭은 ink 배경 반전.
+- **FAB**: 56×56 **정사각형**(borderRadius: 0). ink 배경, 2px 테두리. 중앙 `+` 기호는 fontWeight 300으로 가볍게. 탭바 위 중앙에 위치.
+- **장부 배지**: 직각 사각형, 1.5px 테두리, 대문자, 넓은 letterSpacing. 헤더 좌측.
+- **수입 가리기 배지**: 직각 사각형, 1.5px 테두리. 활성 시 mute2 배경 + 취소선. 헤더 우측.
+- **MonthHeader**: 상하 2px 굵은 테두리. 내비게이션(◀ 월.라벨 ▶) + 수입/지출 합계 행. 중앙 세로 구분선.
+- **달력 셀**: 날짜(좌상단) + NOW 배지 + 금액(우하단). 오늘/선택 시 전체 반전. 비당월 셀은 rule 배경 + 0.4 opacity.
+- **거래 입력**: 바텀시트. 지출/수입 세그먼트 토글 → 금액(28px hero) → 날짜 → 카테고리 칩 → 결제수단 칩 → 메모 → 저장(2:1)/취소(1:2) 버튼.
+- **거래 한 줄**: 카테고리(굵게) + 메모(mute1) + 결제수단(mute2, letterSpacing) | 금액(수입=mute1, 지출=ink). 우측 스와이프 삭제.
+- **통계 카드**: hairline 테두리 + 12px radius + 16px 패딩. 도넛(중앙 합계)·월별 막대·결제수단 바.
+- **장부 선택 모달**: ink 배경 시트, card 배경 항목. 선택 항목만 반전.
 
 ## 접근·사용성 의도
 
-- **색맹/대비**: 본문은 늘 `text` 대비를 유지하고, 수입/지출은 **색+부호(+/−)+문맥(토글, 라벨)**로 이중으로 전달한다.  
-- **한 손**: 하단이 주 상호작용(탭, FAB)으로 모이고, 시트는 화면 대부분(85%)까지 올라 **폼이 손끝 영역**에 머무르도록 한다.  
-- **이모지 아이콘**: 벡터 아이콘 세트 대신 이모지(달력, 클립보드, 차트, 톱니)로 *친근한 일상* 톤을 약하게 넣는다(픽셀 퍼펙트보다 “가계부 앱” 느낌 우선).
+- **색맹 안전**: 유채색에 의존하지 않는다. 수입/지출은 **농도(진/연) + 부호(+/−) + 문맥(토글, 라벨)**로 삼중 전달.
+- **고대비**: ink/paper 간 명도 차이가 극대화되어 가독성 높음.
+- **한 손**: 하단 탭 + FAB로 주 상호작용이 모인다. 바텀시트 85%까지 올라 폼이 손끝 영역에 머무름.
+- **Unicode 아이콘**: 벡터 아이콘 세트나 이모지 대신 기하학적 Unicode 심볼(▪ ≡ ◆ ▲ ◎ ◀ ▶ ▾ ✕ ✓)로 일관된 brutalist 톤.
 
-이 문서의 frontmatter 토큰은 위 서술한 시각 규칙을 **한 번에 복사·이식**할 수 있게 묶은 것이며, 구현 세부(라이브러리 이름, 파일 구조)는 **의도적으로 생략**해 어떤 스택에서도 동일한 겉모습·리듬을 목표로 할 수 있게 한다.
+이 문서의 frontmatter 토큰은 위 서술한 시각 규칙을 한 번에 복사·이식할 수 있게 묶은 것이며, 구현 세부(라이브러리 이름, 파일 구조)는 의도적으로 생략해 디자인 언어만 전달한다.
