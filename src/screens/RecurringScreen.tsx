@@ -318,7 +318,7 @@ export function RecurringScreen(): React.JSX.Element {
       {/* List */}
       {rules.length === 0 ? (
         <View style={styles.empty}>
-          <Text style={[styles.emptyText, { color: theme.mute2 }]}>고정거래가 없습니다</Text>
+          <Text style={[styles.emptyText, { color: theme.mute2 }]}>반복거래가 없습니다</Text>
         </View>
       ) : (
         <FlatList
@@ -359,7 +359,7 @@ export function RecurringScreen(): React.JSX.Element {
           keyboardShouldPersistTaps="handled"
         >
           <Text style={[styles.formTitle, { color: theme.ink }]}>
-            {editingRule ? "고정거래 수정" : "고정거래 추가"}
+            {editingRule ? "반복거래 수정" : "반복거래 추가"}
           </Text>
 
           {/* Type toggle */}
